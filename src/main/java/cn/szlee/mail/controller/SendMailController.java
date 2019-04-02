@@ -3,7 +3,7 @@ package cn.szlee.mail.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,13 +24,13 @@ public class SendMailController {
     @Autowired
     private JavaMailSender mailSender;
 
-    @GetMapping
-    public void sendSimpleMail() {
+    @PostMapping
+    public void sendSimpleMail(String from, String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("lcm@lcm.com");
-        message.setTo("lisz929@163.com");
-        message.setSubject("主题：简单邮件");
-        message.setText("测试邮件内容");
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
         mailSender.send(message);
     }
 }
