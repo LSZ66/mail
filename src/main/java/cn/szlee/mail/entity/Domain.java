@@ -7,24 +7,18 @@ import javax.persistence.*;
 
 /**
  * @author 李尚哲
- * 用户实体类
+ * 域名实体类
  */
 @Entity
+@Table(name = "virtual_domains")
 @Data
-@Table(name = "virtual_users")
 @ToString
-public class User {
+public class Domain {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(insertable = false, nullable = false)
     private Integer id;
 
-    @Column(name = "domain_id", nullable = false)
-    private Integer domainId;
-
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
-    private String email;
+    private String name;
 }

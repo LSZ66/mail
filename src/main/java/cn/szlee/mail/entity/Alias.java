@@ -7,24 +7,24 @@ import javax.persistence.*;
 
 /**
  * @author 李尚哲
- * 用户实体类
+ * 邮箱别名实体类
  */
-@Entity
 @Data
-@Table(name = "virtual_users")
+@Entity
+@Table(name = "virtual_aliases")
 @ToString
-public class User {
+public class Alias {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(insertable = false, nullable = false)
+    @Column(name = "id", insertable = false, nullable = false)
     private Integer id;
 
     @Column(name = "domain_id", nullable = false)
     private Integer domainId;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "source", nullable = false)
+    private String source;
 
-    @Column(nullable = false)
-    private String email;
+    @Column(name = "destination", nullable = false)
+    private String destination;
 }
