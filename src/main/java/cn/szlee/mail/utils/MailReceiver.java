@@ -26,8 +26,9 @@ import java.util.Properties;
 public class MailReceiver {
 
     private static void parseMessage(Message... messages) throws MessagingException, IOException {
-        if (messages == null || messages.length < 1)
+        if (messages == null || messages.length < 1) {
             throw new MessagingException("未找到要解析的邮件!");
+        }
 
         // 解析所有邮件
         for (Message message : messages) {
@@ -44,7 +45,8 @@ public class MailReceiver {
             boolean isContainerAttachment = isContainAttachment(msg);
             System.out.println("是否包含附件：" + isContainerAttachment);
             if (isContainerAttachment) {
-                saveAttachment(msg, "c:\\mailtmp\\" + msg.getSubject() + "_"); //保存附件
+                //保存附件
+                saveAttachment(msg, "c:\\mailtmp\\" + msg.getSubject() + "_");
             }
             StringBuffer content = new StringBuffer(30);
             getMailTextContent(msg, content);
@@ -72,8 +74,9 @@ public class MailReceiver {
      */
     private static String getFrom(MimeMessage msg) throws MessagingException, UnsupportedEncodingException {
         Address[] froms = msg.getFrom();
-        if (froms.length < 1)
+        if (froms.length < 1) {
             throw new MessagingException("没有发件人!");
+        }
 
         InternetAddress address = (InternetAddress) froms[0];
         String person = address.getPersonal();
@@ -98,15 +101,16 @@ public class MailReceiver {
         StringBuilder receiveAddress = new StringBuilder();
         Address[] address = msg.getAllRecipients();
 
-        if (address == null || address.length < 1)
+        if (address == null || address.length < 1) {
             throw new MessagingException("没有收件人!");
+        }
         for (Address x : address) {
             InternetAddress internetAddress = (InternetAddress) x;
             receiveAddress.append(internetAddress.toUnicodeString()).append(",");
         }
 
-        receiveAddress.deleteCharAt(receiveAddress.length() - 1);    //删除最后一个逗号
-
+        //删除最后一个逗号
+        receiveAddress.deleteCharAt(receiveAddress.length() - 1);
         return receiveAddress.toString();
     }
 
@@ -118,8 +122,9 @@ public class MailReceiver {
      */
     private static String getSentDate(MimeMessage msg) throws MessagingException {
         Date receivedDate = msg.getSentDate();
-        if (receivedDate == null)
+        if (receivedDate == null) {
             return "";
+        }
 
         return new SimpleDateFormat("yyyy年MM月dd日 E HH:mm ").format(receivedDate);
     }
@@ -151,7 +156,9 @@ public class MailReceiver {
                         flag = true;
                     }
                 }
-                if (flag) break;
+                if (flag) {
+                    break;
+                }
             }
         } else if (part.isMimeType("message/rfc822")) {
             flag = isContainAttachment((Part) part.getContent());
@@ -178,8 +185,9 @@ public class MailReceiver {
     private static boolean isReplySign(MimeMessage msg) throws MessagingException {
         boolean replySign = false;
         String[] headers = msg.getHeader("Disposition-Notification-To");
-        if (headers != null)
+        if (headers != null) {
             replySign = true;
+        }
         return replySign;
     }
 
@@ -194,12 +202,13 @@ public class MailReceiver {
         String[] headers = msg.getHeader("X-Priority");
         if (headers != null) {
             String headerPriority = headers[0];
-            if (headerPriority.contains("1") || headerPriority.contains("High"))
+            if (headerPriority.contains("1") || headerPriority.contains("High")) {
                 priority = "紧急";
-            else if (headerPriority.contains("5") || headerPriority.contains("Low"))
+            } else if (headerPriority.contains("5") || headerPriority.contains("Low")) {
                 priority = "低";
-            else
+            } else {
                 priority = "普通";
+            }
         }
         return priority;
     }
@@ -235,7 +244,8 @@ public class MailReceiver {
      */
     private static void saveAttachment(Part part, String destDir) throws MessagingException, IOException {
         if (part.isMimeType("multipart/*")) {
-            Multipart multipart = (Multipart) part.getContent();    //复杂体邮件
+            //复杂体邮件
+            Multipart multipart = (Multipart) part.getContent();
             //复杂体邮件包含多个邮件体
             int partCount = multipart.getCount();
             for (int i = 0; i < partCount; i++) {
