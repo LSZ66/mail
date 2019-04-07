@@ -20,7 +20,7 @@ public class User {
     private Integer id;
 
     @Column(name = "domain_id", nullable = false)
-    private Integer domainId;
+    private Integer domainId = 1;
 
     @Column(nullable = false)
     private String password;

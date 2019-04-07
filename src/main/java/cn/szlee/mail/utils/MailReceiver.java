@@ -38,19 +38,19 @@ public class MailReceiver {
             System.out.println("发件人: " + getFrom(msg));
             System.out.println("收件人：" + getReceiveAddress(msg));
             System.out.println("发送时间：" + getSentDate(msg));
-            System.out.println("是否已读：" + isSeen(msg));
-            System.out.println("邮件优先级：" + getPriority(msg));
-            System.out.println("是否需要回执：" + isReplySign(msg));
-            System.out.println("邮件大小：" + msg.getSize() * 1024 + "kb");
-            boolean isContainerAttachment = isContainAttachment(msg);
-            System.out.println("是否包含附件：" + isContainerAttachment);
-            if (isContainerAttachment) {
-                //保存附件
-                saveAttachment(msg, "c:\\mailtmp\\" + msg.getSubject() + "_");
-            }
+//            System.out.println("是否已读：" + isSeen(msg));
+//            System.out.println("邮件优先级：" + getPriority(msg));
+//            System.out.println("是否需要回执：" + isReplySign(msg));
+//            System.out.println("邮件大小：" + msg.getSize() * 1024 + "kb");
+//            boolean isContainerAttachment = isContainAttachment(msg);
+//            System.out.println("是否包含附件：" + isContainerAttachment);
+//            if (isContainerAttachment) {
+//                //保存附件
+//                saveAttachment(msg, "c:\\mailtmp\\" + msg.getSubject() + "_");
+//            }
             StringBuffer content = new StringBuffer(30);
             getMailTextContent(msg, content);
-            System.out.println("邮件正文：" + (content.length() > 100 ? content.substring(0, 100) + "..." : content));
+            System.out.println("邮件正文：" + content);
             System.out.println("------------------第" + msg.getMessageNumber() + "封邮件解析结束-------------------- ");
             System.out.println();
         }

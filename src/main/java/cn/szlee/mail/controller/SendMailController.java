@@ -1,5 +1,6 @@
 package cn.szlee.mail.controller;
 
+import cn.szlee.mail.utils.MailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -22,17 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SendMailController {
 
     @Autowired
-    private JavaMailSenderImpl mailSender;
+    private MailSender sender;
 
     @PostMapping
     public void sendSimpleMail(String to, String subject, String text) {
-        mailSender.setUsername("lsz@szlee.cn");
-        mailSender.setPassword("lsz.0929");
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("lsz@szlee.cn");
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+        sender.send(to, subject, text);
     }
 }
