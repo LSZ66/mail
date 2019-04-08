@@ -317,8 +317,8 @@ public class MailReceiver {
             props.setProperty("mail.imap.ssl.enable", "true");
             props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
             props.setProperty("mail.store.protocol", "imap");
-            String username = "lsz@szlee.cn";
-            String password = "lsz.0929";
+            String username = "fps@szlee.cn";
+            String password = "fps.2108";
             Session session = Session.getInstance(props);
 
             IMAPStore store = (IMAPStore) session.getStore("imap");

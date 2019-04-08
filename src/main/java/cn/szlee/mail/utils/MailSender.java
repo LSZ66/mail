@@ -5,8 +5,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
-import javax.mail.MessagingException;
-
 @Component("myMailSender")
 public class MailSender {
 
@@ -15,16 +13,16 @@ public class MailSender {
 
     public void send(String to, String subject, String text) {
         //(String)session.getAttribute("username")
-        String username = "hyb@szlee.cn";
+        String username = "lsz@szlee.cn";
         //(String) session.getAttribute("password")
-        String password = "hyb.2616";
-
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setFrom("黄悦彬");
-//        message.setFrom(javaMailSender.getUsername());
-//        message.setTo(to);
-//        message.setSubject(subject);
-//        message.setText(text);
-//        javaMailSender.send(message);
+        String password = "lsz.0929";
+        javaMailSender.setUsername(username);
+        javaMailSender.setPassword(password);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("admin@szlee.cn");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        javaMailSender.send(message);
     }
 }

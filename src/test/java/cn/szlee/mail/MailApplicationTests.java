@@ -45,7 +45,7 @@ public class MailApplicationTests {
 
     @Test
     public void sendSimpleMail() {
-        mailSender.send("lsz@szlee.cn", "你好啊", "抽取方法");
+        mailSender.send("fps@szlee.cn", "欢迎使用", "您好，这是您的邮箱");
     }
 
     @Autowired
