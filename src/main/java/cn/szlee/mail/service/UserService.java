@@ -34,7 +34,6 @@ public class UserService {
      * @param password  用户密码
      * @return  如果数据库中用户名不存在，则注册成功返回true；否则返回false。
      */
-    @Transactional
     public boolean add(String username, String password) {
         String email = username + domain;
         if (repository.findByEmail(email) != null) {
@@ -52,6 +51,9 @@ public class UserService {
      * @return  如果用户名和密码匹配，则登陆成功返回true；否则返回false。
      */
     public boolean login(String username, String password) {
+        if (repository.findByEmail(username + domain) == null) {
+            return false;
+        }
         try {
             javaMailSender.setUsername(username + domain);
             javaMailSender.setPassword(password);
