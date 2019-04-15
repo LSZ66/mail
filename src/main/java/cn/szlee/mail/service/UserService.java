@@ -1,66 +1,34 @@
 package cn.szlee.mail.service;
 
-import cn.szlee.mail.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.mail.javamail.JavaMailSender;
 
-import javax.mail.MessagingException;
+/**
+ * <b><code>UserService</code></b>
+ * <p/>
+ * 用户Service层
+ * <p/>
+ * <b>Creation Time:</b> 2019-04-14 19:23.
+ *
+ * @author 李尚哲
+ * @since mail 1.0
+ */
+public interface UserService {
 
-@Service
-public class UserService {
-
-    /**
-     * 邮箱域名
-     */
-    private final String domain = "@szlee.cn";
-
-    /**
-     * Spring Mail发送器，用于检测是否能登录
-     */
-    @Autowired
-    private JavaMailSenderImpl javaMailSender;
+    String DOMAIN = "@szlee.cn";
 
     /**
-     * 用户持久层类
-     */
-    @Autowired
-    private UserRepository repository;
-
-    /**
-     * 添加/注册一个用户
+     * 用户登陆
      * @param username  用户名
-     * @param password  用户密码
-     * @return  如果数据库中用户名不存在，则注册成功返回true；否则返回false。
+     * @param password  密码
+     * @return  如果登陆成功，返回一个Sender对象，如果登陆失败，则返回null
      */
-    public boolean add(String username, String password) {
-        String email = username + domain;
-        if (repository.findByEmail(email) != null) {
-            //已存在该用户，不允许注册
-            return false;
-        }
-        repository.insert(email, password);
-        return true;
-    }
+    JavaMailSender login(String username, String password);
 
     /**
-     * 用户登录
+     * 用户注册
      * @param username  用户名
-     * @param password  用户密码
-     * @return  如果用户名和密码匹配，则登陆成功返回true；否则返回false。
+     * @param password  密码
+     * @return  如果用户名不存在，则注册成功，返回true，否则注册失败，返回false
      */
-    public boolean login(String username, String password) {
-        if (repository.findByEmail(username + domain) == null) {
-            return false;
-        }
-        try {
-            javaMailSender.setUsername(username + domain);
-            javaMailSender.setPassword(password);
-            javaMailSender.testConnection();
-        } catch (MessagingException e) {
-            return false;
-        }
-        return true;
-    }
+    boolean register(String username, String password);
 }
