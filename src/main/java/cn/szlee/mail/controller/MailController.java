@@ -1,14 +1,19 @@
 package cn.szlee.mail.controller;
 
+import cn.szlee.mail.entity.Mail;
+import cn.szlee.mail.service.MailService;
+import com.sun.mail.imap.IMAPFolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * <b><code>MailController</code></b>
@@ -23,6 +28,24 @@ import javax.servlet.http.HttpSession;
 @RestController
 @RequestMapping("/mail")
 public class MailController {
+
+    @Autowired
+    private MailService service;
+
+    @GetMapping("/getInbox")
+    public List<Mail> getInboxList(HttpSession session) {
+        IMAPFolder userInbox = (IMAPFolder) session.getAttribute("userInbox");
+        return service.getInboxList(userInbox);
+    }
+
+    @GetMapping("/getMsg")
+    public Mail getMessageById(Integer id, HttpSession session) {
+        if (id == null) {
+            return null;
+        }
+        IMAPFolder userInbox = (IMAPFolder) session.getAttribute("userInbox");
+        return service.getMessageById(userInbox, id);
+    }
 
     @PostMapping
     public void send(String to, String subject, String text, HttpSession session) {

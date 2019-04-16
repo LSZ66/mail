@@ -1,5 +1,6 @@
 package cn.szlee.mail.service;
 
+import cn.szlee.mail.entity.User;
 import org.springframework.mail.javamail.JavaMailSender;
 
 /**
@@ -31,4 +32,12 @@ public interface UserService {
      * @return  如果用户名不存在，则注册成功，返回true，否则注册失败，返回false
      */
     boolean register(String username, String password);
+
+    /**
+     * 通过username获取用户实体类
+     *
+     * @param username 用户名
+     * @return 用户实体类
+     */
+    User getUser(String username);
 }

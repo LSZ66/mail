@@ -1,5 +1,6 @@
 package cn.szlee.mail.service.impl;
 
+import cn.szlee.mail.entity.User;
 import cn.szlee.mail.repository.UserRepository;
 import cn.szlee.mail.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,9 @@ public class UserServiceImpl implements UserService {
      * @return  如果用户名已存在，则返回true，否则返回false
      */
     private boolean checkUsername(String username) {
-        return repository.findByEmail(username + DOMAIN) != null;
+        return getUser(username) != null;
     }
+
 
     @Override
     public JavaMailSender login(String username, String password) {
@@ -65,5 +67,10 @@ public class UserServiceImpl implements UserService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public User getUser(String username) {
+        return repository.findByEmail(username + DOMAIN);
     }
 }

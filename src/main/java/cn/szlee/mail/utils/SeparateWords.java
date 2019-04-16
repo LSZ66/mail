@@ -3,6 +3,7 @@ package cn.szlee.mail.utils;
 
 import org.apdplat.word.WordSegmenter;
 import org.apdplat.word.segmentation.Word;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +18,10 @@ import java.util.List;
  * @author 李尚哲
  * @since mail 1.0
  */
+@Component
 public class SeparateWords {
 
-    public static List<String> separate(String mail) {
+    private static List<String> separate(String mail) {
         List<Word> seg = WordSegmenter.seg(mail);
         List<String> words = new ArrayList<>();
         seg.forEach(item -> words.add(item.getText()));
