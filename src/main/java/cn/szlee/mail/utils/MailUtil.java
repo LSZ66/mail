@@ -1,5 +1,6 @@
 package cn.szlee.mail.utils;
 
+import cn.szlee.mail.config.Constant;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -26,26 +27,51 @@ import java.util.Properties;
 public class MailUtil {
 
     /**
-     * 获取用户收件箱
+     * 获取用户邮箱空间
      *
      * @param username 用户名
      * @param password 密码
-     * @return 用户收件箱
+     * @return 用户邮箱空间
      */
-    public static IMAPFolder getInbox(String username, String password) throws MessagingException {
+    public static IMAPStore getStore(String username, String password) throws MessagingException {
         Properties props = System.getProperties();
-        props.setProperty("mail.imap.host", "szlee.cn");
+        props.setProperty("mail.imap.host", Constant.DOMAIN);
         props.setProperty("mail.imap.port", "993");
         props.setProperty("mail.imap.ssl.enable", "true");
         props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.setProperty("mail.store.protocol", "imap");
+        props.setProperty("mail.store.protocol", Constant.IMAP);
         Session session = Session.getInstance(props);
-        IMAPStore store = (IMAPStore) session.getStore("imap");
-        store.connect(username + "@szlee.cn", password);
-        IMAPFolder folder = (IMAPFolder) store.getFolder("INBOX");
+        IMAPStore store = (IMAPStore) session.getStore(Constant.IMAP);
+        store.connect(username + Constant.MAIL_SUFFIX, password);
+        return store;
+    }
+
+    /**
+     * 获取用户收件箱
+     *
+     * @param store 用户邮箱空间
+     * @return 用户收件箱
+     */
+    public static IMAPFolder getInbox(IMAPStore store) throws MessagingException {
+        IMAPFolder folder = (IMAPFolder) store.getFolder(Constant.INBOX);
         if (folder.exists()) {
             folder.open(Folder.READ_WRITE);
         }
+        return folder;
+    }
+
+    /**
+     * 获取用户发件箱
+     *
+     * @param store 用户邮箱空间
+     * @return 用户发件箱
+     */
+    public static IMAPFolder getOutbox(IMAPStore store) throws MessagingException {
+        IMAPFolder folder = (IMAPFolder) store.getFolder(Constant.OUTBOX);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
+        }
+        folder.open(Folder.READ_WRITE);
         return folder;
     }
 
@@ -160,11 +186,11 @@ public class MailUtil {
     private static void getMailTextContent(Part part, StringBuffer content) throws MessagingException, IOException {
         //如果是文本类型的附件，通过getContent方法可以取到文本内容，但这不是我们需要的结果，所以在这里要做判断
         boolean isContainTextAttach = part.getContentType().indexOf("name") > 0;
-        if (part.isMimeType("text/*") && !isContainTextAttach) {
+        if (part.isMimeType(Constant.MAIL_TEXT) && !isContainTextAttach) {
             content.append(part.getContent().toString());
-        } else if (part.isMimeType("message/rfc822")) {
+        } else if (part.isMimeType(Constant.MAIL_RFC822)) {
             getMailTextContent((Part) part.getContent(), content);
-        } else if (part.isMimeType("multipart/*")) {
+        } else if (part.isMimeType(Constant.MAIL_MULTIPART)) {
             Multipart multipart = (Multipart) part.getContent();
             int partCount = multipart.getCount();
             for (int i = 0; i < partCount; i++) {

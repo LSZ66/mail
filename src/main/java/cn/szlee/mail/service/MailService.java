@@ -2,7 +2,9 @@ package cn.szlee.mail.service;
 
 import cn.szlee.mail.entity.Mail;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 
+import javax.mail.internet.MimeMessage;
 import java.util.List;
 
 /**
@@ -20,10 +22,18 @@ public interface MailService {
     /**
      * 获取用户收件箱列表
      *
-     * @param folder 用户收件箱
+     * @param store 用户邮箱空间
      * @return 收件箱列表
      */
-    List<Mail> getInboxList(IMAPFolder folder);
+    List<Mail> getInboxList(IMAPStore store);
+
+    /**
+     * 获取用户发件箱列表
+     *
+     * @param store 用户邮箱空间
+     * @return 发件箱列表
+     */
+    List<Mail> getOutboxList(IMAPStore store);
 
     /**
      * 从收件箱中取出一份邮件
@@ -33,4 +43,12 @@ public interface MailService {
      * @return id对应的邮件
      */
     Mail getMessageById(IMAPFolder folder, int id);
+
+    /**
+     * 将邮件保存到发件箱
+     *
+     * @param message 邮件体
+     * @param store   用户邮箱空间
+     */
+    void saveToOutbox(MimeMessage message, IMAPStore store);
 }

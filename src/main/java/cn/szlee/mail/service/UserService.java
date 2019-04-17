@@ -1,7 +1,6 @@
 package cn.szlee.mail.service;
 
 import cn.szlee.mail.entity.User;
-import org.springframework.mail.javamail.JavaMailSender;
 
 /**
  * <b><code>UserService</code></b>
@@ -15,15 +14,13 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 public interface UserService {
 
-    String DOMAIN = "@szlee.cn";
-
     /**
      * 用户登陆
      * @param username  用户名
      * @param password  密码
-     * @return  如果登陆成功，返回一个Sender对象，如果登陆失败，则返回null
+     * @return 如果登陆成功，返回一个用户实体对象，如果登陆失败，则返回null
      */
-    JavaMailSender login(String username, String password);
+    User queryForLogin(String username, String password);
 
     /**
      * 用户注册
