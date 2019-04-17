@@ -34,11 +34,12 @@ public class UserController {
     private UserService service;
 
     @PostMapping("/login")
-    public boolean login(String username, String password, HttpSession session) {
+    public boolean login(String username, String password, HttpSession session) throws MessagingException {
         User user = service.queryForLogin(username, password);
         if (user != null) {
             session.setAttribute("userName", user.getName());
             session.setAttribute("userEmail", user.getEmail());
+            getOverview(username, password, session);
             return true;
         } else {
             return false;

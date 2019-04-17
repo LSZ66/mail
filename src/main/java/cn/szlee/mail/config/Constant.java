@@ -16,8 +16,8 @@ public class Constant {
     public static final String MAIL_SUFFIX = "@" + DOMAIN;
     public static final String IMAP = "imap";
     public static final String INBOX = "INBOX";
-    public static final String OUTBOX = "OUTBOX";
-    public static final String SPAM_BOX = "SPAM_BOX";
+    public static final String OUTBOX = "发件箱";
+    public static final String SPAM_BOX = "垃圾箱";
     public static final String MAIL_TEXT = "text/*";
     public static final String MAIL_RFC822 = "message/rfc822";
     public static final String MAIL_MULTIPART = "multipart/*";

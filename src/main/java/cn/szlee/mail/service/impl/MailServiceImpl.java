@@ -59,6 +59,7 @@ public class MailServiceImpl implements MailService {
                 mail.setState(state);
                 inbox.add(0, mail);
             }
+            folder.close();
         } catch (MessagingException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
@@ -83,6 +84,7 @@ public class MailServiceImpl implements MailService {
                 mail.setSendTime(MailUtil.getSentDate(msg));
                 outbox.add(0, mail);
             }
+            folder.close();
         } catch (MessagingException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
@@ -95,12 +97,16 @@ public class MailServiceImpl implements MailService {
         Mail mail = new Mail();
         MimeMessage message;
         try {
+            if (!folder.isOpen()) {
+                folder.open(Folder.READ_ONLY);
+            }
             message = (MimeMessage) folder.getMessage(id);
             mail.setId(id);
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
             mail.setReceiveTime(MailUtil.getSentDate(message));
             mail.setText(MailUtil.getMailTextContent(message));
+            folder.close();
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
         }
@@ -115,6 +121,7 @@ public class MailServiceImpl implements MailService {
                 folder.create(Folder.HOLDS_MESSAGES);
             }
             folder.appendMessages(new Message[]{message});
+            folder.close();
         } catch (MessagingException e) {
             e.printStackTrace();
         }

@@ -240,7 +240,11 @@ public class MailUtil {
      * @return 用户未读消息总数
      */
     public static int getNewMessageCount(IMAPStore store) throws MessagingException {
-        return store.getFolder("INBOX").getNewMessageCount();
+        Folder folder = store.getFolder(Constant.INBOX);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
+        }
+        return folder.getNewMessageCount();
     }
 
     /**
@@ -250,7 +254,11 @@ public class MailUtil {
      * @return 用户邮件总数
      */
     public static int getInboxMessageCount(IMAPStore store) throws MessagingException {
-        return store.getFolder("INBOX").getMessageCount();
+        Folder folder = store.getFolder(Constant.INBOX);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
+        }
+        return folder.getMessageCount();
     }
 
     /**
@@ -260,6 +268,10 @@ public class MailUtil {
      * @return 用户邮件总数
      */
     public static int getOutboxMessageCount(IMAPStore store) throws MessagingException {
-        return store.getFolder("OUTBOX").getMessageCount();
+        Folder folder = store.getFolder(Constant.OUTBOX);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
+        }
+        return folder.getMessageCount();
     }
 }
