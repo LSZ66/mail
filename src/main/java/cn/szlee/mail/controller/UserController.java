@@ -6,13 +6,13 @@ import cn.szlee.mail.service.UserService;
 import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -33,38 +33,43 @@ public class UserController {
     @Autowired
     private UserService service;
 
-    @Qualifier("taskExecutor")
-    @Autowired
-    private TaskExecutor executor;
-
-
     @PostMapping("/login")
     public boolean login(String username, String password, HttpSession session) {
         User user = service.queryForLogin(username, password);
         if (user != null) {
             session.setAttribute("userName", user.getName());
             session.setAttribute("userEmail", user.getEmail());
-            executor.execute(() -> {
-                JavaMailSenderImpl sender = new JavaMailSenderImpl();
-                sender.setHost(Constant.DOMAIN);
-                Properties mailProps = new Properties();
-                mailProps.put("mail.smtp.auth", true);
-                mailProps.put("mail.smtp.starttls.enable", true);
-                sender.setJavaMailProperties(mailProps);
-                sender.setUsername(username + Constant.MAIL_SUFFIX);
-                sender.setPassword(password);
-                session.setAttribute("userSender", sender);
-                IMAPStore store = null;
-                try {
-                    store = MailUtil.getStore(username, password);
-                } catch (MessagingException e) {
-                    e.printStackTrace();
-                }
-                session.setAttribute("userStore", store);
-            });
             return true;
+        } else {
+            return false;
         }
-        return false;
+    }
+
+    @GetMapping("/overview")
+    public Map<String, Integer> getOverview(String username, String password, HttpSession session) throws MessagingException {
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setHost(Constant.DOMAIN);
+        Properties mailProps = new Properties();
+        mailProps.put("mail.smtp.auth", true);
+        mailProps.put("mail.smtp.starttls.enable", true);
+        sender.setJavaMailProperties(mailProps);
+        sender.setUsername(username + Constant.MAIL_SUFFIX);
+        sender.setPassword(password);
+        session.setAttribute("userSender", sender);
+        IMAPStore store;
+        try {
+            store = MailUtil.getStore(username, password);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return null;
+        }
+        session.setAttribute("userStore", store);
+        Map<String, Integer> map = new HashMap<>(4);
+        map.put("unread", MailUtil.getNewMessageCount(store));
+        map.put("inbox", MailUtil.getInboxMessageCount(store));
+        map.put("outbox", MailUtil.getOutboxMessageCount(store));
+        map.put("draft", 2);
+        return map;
     }
 
     @PostMapping("/register")

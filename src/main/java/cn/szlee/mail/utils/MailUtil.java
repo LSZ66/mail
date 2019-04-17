@@ -26,6 +26,9 @@ import java.util.Properties;
  */
 public class MailUtil {
 
+    private MailUtil() {
+    }
+
     /**
      * 获取用户邮箱空间
      *
@@ -228,5 +231,35 @@ public class MailUtil {
      */
     public static boolean isDeleted(MimeMessage msg) throws MessagingException {
         return msg.getFlags().contains(Flags.Flag.DELETED);
+    }
+
+    /**
+     * 获取未读消息总数
+     *
+     * @param store 用户邮箱空间
+     * @return 用户未读消息总数
+     */
+    public static int getNewMessageCount(IMAPStore store) throws MessagingException {
+        return store.getFolder("INBOX").getNewMessageCount();
+    }
+
+    /**
+     * 获取收件箱总数
+     *
+     * @param store 用户邮箱空间
+     * @return 用户邮件总数
+     */
+    public static int getInboxMessageCount(IMAPStore store) throws MessagingException {
+        return store.getFolder("INBOX").getMessageCount();
+    }
+
+    /**
+     * 获取发件箱总数
+     *
+     * @param store 用户邮箱空间
+     * @return 用户邮件总数
+     */
+    public static int getOutboxMessageCount(IMAPStore store) throws MessagingException {
+        return store.getFolder("OUTBOX").getMessageCount();
     }
 }
