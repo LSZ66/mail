@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author 李尚哲
@@ -19,6 +20,7 @@ public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecifi
      * @param password 密码
      */
     @Modifying
+    @Transactional(rollbackFor = Exception.class)
     @Query(value =
             "insert into virtual_users(domain_id, email, password) " +
                     "value(1, ?1, ENCRYPT(?2, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))))",

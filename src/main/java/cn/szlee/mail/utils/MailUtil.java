@@ -1,7 +1,6 @@
 package cn.szlee.mail.utils;
 
 import cn.szlee.mail.config.Constant;
-import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 import javax.mail.*;
@@ -45,37 +44,8 @@ public class MailUtil {
         props.setProperty("mail.store.protocol", Constant.IMAP);
         Session session = Session.getInstance(props);
         IMAPStore store = (IMAPStore) session.getStore(Constant.IMAP);
-        store.connect(username + Constant.MAIL_SUFFIX, password);
+        store.connect(username, password);
         return store;
-    }
-
-    /**
-     * 获取用户收件箱
-     *
-     * @param store 用户邮箱空间
-     * @return 用户收件箱
-     */
-    public static IMAPFolder getInbox(IMAPStore store) throws MessagingException {
-        IMAPFolder folder = (IMAPFolder) store.getFolder(Constant.INBOX);
-        if (folder.exists()) {
-            folder.open(Folder.READ_WRITE);
-        }
-        return folder;
-    }
-
-    /**
-     * 获取用户发件箱
-     *
-     * @param store 用户邮箱空间
-     * @return 用户发件箱
-     */
-    public static IMAPFolder getOutbox(IMAPStore store) throws MessagingException {
-        IMAPFolder folder = (IMAPFolder) store.getFolder(Constant.OUTBOX);
-        if (!folder.exists()) {
-            folder.create(Folder.HOLDS_MESSAGES);
-        }
-        folder.open(Folder.READ_WRITE);
-        return folder;
     }
 
     /**

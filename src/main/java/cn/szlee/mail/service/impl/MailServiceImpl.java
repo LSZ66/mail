@@ -1,5 +1,6 @@
 package cn.szlee.mail.service.impl;
 
+import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
 import cn.szlee.mail.utils.MailUtil;
@@ -29,79 +30,154 @@ import java.util.List;
 @Service
 public class MailServiceImpl implements MailService {
 
-    @Override
-    public List<Mail> getInboxList(IMAPStore store) {
-        List<Mail> inbox = new LinkedList<>();
-        IMAPFolder folder;
-        Message[] messages;
-        try {
-            folder = MailUtil.getInbox(store);
-            messages = folder.getMessages();
-            for (Message message : messages) {
-                if (MailUtil.isDeleted((MimeMessage) message)) {
-                    //邮件已被删除
-                    continue;
-                }
-                MimeMessage msg = (MimeMessage) message;
-                Mail mail = new Mail();
-                mail.setId(msg.getMessageNumber());
-                mail.setFrom(MailUtil.getFrom(msg));
-                mail.setSubject(MailUtil.getSubject(msg));
-                mail.setReceiveTime(MailUtil.getSentDate(msg));
-                int state = 0;
-                if (MailUtil.isSeen(msg)) {
-                    if (MailUtil.isAnswered(msg)) {
-                        state = 2;
-                    } else {
-                        state = 1;
-                    }
-                }
-                mail.setState(state);
-                inbox.add(0, mail);
-            }
-            folder.close();
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
+    private IMAPFolder getFolder(String box, IMAPStore store) throws MessagingException {
+        switch (box) {
+            case "inbox":
+                box = Constant.INBOX;
+                break;
+            case "outbox":
+                box = Constant.OUTBOX;
+                break;
+            case "draft":
+                box = Constant.DRAFT_BOX;
+                break;
+            case "spam":
+                box = Constant.SPAM_BOX;
+                break;
+            case "recycle":
+                box = Constant.RECYCLE;
+                break;
+            default:
+                throw new MessagingException("没有此文件夹");
         }
-        return inbox;
+        IMAPFolder folder = (IMAPFolder) store.getFolder(box);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
+        }
+        folder.open(Folder.READ_WRITE);
+        return folder;
     }
 
-    @Override
-    public List<Mail> getOutboxList(IMAPStore store) {
-        List<Mail> outbox = new LinkedList<>();
-        IMAPFolder folder;
-        Message[] messages;
-        try {
-            folder = MailUtil.getOutbox(store);
-            messages = folder.getMessages();
-            for (Message message : messages) {
-                MimeMessage msg = (MimeMessage) message;
-                Mail mail = new Mail();
-                mail.setId(msg.getMessageNumber());
-                mail.setTo(MailUtil.getReceiveAddress(msg));
-                mail.setSubject(MailUtil.getSubject(msg));
-                mail.setSendTime(MailUtil.getSentDate(msg));
-                outbox.add(0, mail);
-            }
-            folder.close();
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return outbox;
-    }
-
-    @Override
-    public Mail getMessageById(IMAPFolder folder, int id) {
+    /**
+     * 封装接收类邮件（收件/垃圾邮件）
+     *
+     * @param message 邮件体
+     * @return 邮件实体类
+     */
+    private Mail setReceiveMail(Message message) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage msg = (MimeMessage) message;
         Mail mail = new Mail();
-        MimeMessage message;
+        mail.setId(msg.getMessageNumber());
+        mail.setFrom(MailUtil.getFrom(msg));
+        mail.setSubject(MailUtil.getSubject(msg));
+        mail.setReceiveTime(MailUtil.getSentDate(msg));
+        int state = 0;
+        if (MailUtil.isSeen(msg)) {
+            if (MailUtil.isAnswered(msg)) {
+                state = 2;
+            } else {
+                state = 1;
+            }
+        }
+        mail.setState(state);
+        return mail;
+    }
+
+    /**
+     * 封装发送的邮件
+     *
+     * @param message 邮件体
+     * @return 邮件实体类
+     */
+    private Mail setSendMail(Message message) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage msg = (MimeMessage) message;
+        Mail mail = new Mail();
+        mail.setId(msg.getMessageNumber());
+        mail.setTo(MailUtil.getReceiveAddress(msg));
+        mail.setSubject(MailUtil.getSubject(msg));
+        mail.setSendTime(MailUtil.getSentDate(msg));
+        return mail;
+    }
+
+    /**
+     * 封装草稿邮件
+     *
+     * @param message 邮件体
+     * @return 邮件实体类
+     */
+    private Mail setDraftMail(Message message) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage msg = (MimeMessage) message;
+        Mail mail = new Mail();
+        mail.setId(msg.getMessageNumber());
+        mail.setFrom(MailUtil.getFrom(msg));
+        mail.setSubject(MailUtil.getSubject(msg));
+        mail.setLastModifyTime(MailUtil.getSentDate(msg));
+        return mail;
+    }
+
+    /**
+     * 封装回收站邮件
+     *
+     * @param message 邮件体
+     * @return 邮件实体类
+     */
+    private Mail setRecycleMail(Message message) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage msg = (MimeMessage) message;
+        Mail mail = new Mail();
+        mail.setId(msg.getMessageNumber());
+        mail.setFrom(MailUtil.getFrom(msg));
+        mail.setSubject(MailUtil.getSubject(msg));
+        mail.setDeleteTime(MailUtil.getSentDate(msg));
+        return mail;
+    }
+
+    @Override
+    public List<Mail> getListByBox(String box, IMAPStore store) {
+        List<Mail> list = new LinkedList<>();
+        IMAPFolder folder;
+        Message[] messages;
         try {
+            folder = getFolder(box, store);
+            messages = folder.getMessages();
+            for (Message message : messages) {
+                Mail mail;
+                switch (box) {
+                    case "inbox":
+                    case "spam":
+                        mail = setReceiveMail(message);
+                        break;
+                    case "outbox":
+                        mail = setSendMail(message);
+                        break;
+                    case "draft":
+                        mail = setDraftMail(message);
+                        break;
+                    case "recycle":
+                        mail = setRecycleMail(message);
+                        break;
+                    default:
+                        mail = null;
+                }
+                list.add(0, mail);
+            }
+            folder.close();
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public Mail getMessageById(String box, int id, IMAPStore store) {
+        Mail mail = new Mail();
+        try {
+            IMAPFolder folder = getFolder(box, store);
             if (!folder.isOpen()) {
                 folder.open(Folder.READ_ONLY);
             }
-            message = (MimeMessage) folder.getMessage(id);
+            MimeMessage message = (MimeMessage) folder.getMessage(id);
             mail.setId(id);
+            mail.setSubject(MailUtil.getSubject(message));
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
             mail.setReceiveTime(MailUtil.getSentDate(message));
@@ -116,7 +192,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public void saveToOutbox(MimeMessage message, IMAPStore store) {
         try {
-            IMAPFolder folder = MailUtil.getOutbox(store);
+            IMAPFolder folder = getFolder("outbox", store);
             if (!folder.exists()) {
                 folder.create(Folder.HOLDS_MESSAGES);
             }

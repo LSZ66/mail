@@ -3,7 +3,6 @@ package cn.szlee.mail.controller;
 import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
-import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -34,30 +33,23 @@ public class MailController {
     @Autowired
     private MailService service;
 
-    @GetMapping("/getInbox")
-    public List<Mail> getInboxList(HttpSession session) {
+    @GetMapping("/getList/{box}")
+    public List<Mail> getList(@PathVariable String box, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.getInboxList(userStore);
+        return service.getListByBox(box, userStore);
     }
 
-    @GetMapping("/getOutbox")
-    public List<Mail> getOutboxList(HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.getOutboxList(userStore);
-    }
-
-    @GetMapping("/getMsg")
-    public Mail getMessageById(Integer id, HttpSession session) throws MessagingException {
+    @GetMapping("/getMsg/{box}/{id}")
+    public Mail getMessageById(@PathVariable String box, @PathVariable Integer id, HttpSession session) {
         if (id == null) {
             return null;
         }
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.getMessageById((IMAPFolder) userStore.getFolder(Constant.INBOX), id);
+        return service.getMessageById(box, id, userStore);
     }
 
     @PostMapping
     public void send(@RequestBody Mail mail, HttpSession session) throws MessagingException, UnsupportedEncodingException {
-        System.out.println(mail);
         JavaMailSender sender = (JavaMailSender) session.getAttribute("userSender");
         String email = (String) session.getAttribute("userEmail");
         String name = (String) session.getAttribute("userName");

@@ -1,6 +1,9 @@
 package cn.szlee.mail.service;
 
 import cn.szlee.mail.entity.User;
+import com.sun.mail.imap.IMAPStore;
+
+import java.util.Map;
 
 /**
  * <b><code>UserService</code></b>
@@ -37,4 +40,12 @@ public interface UserService {
      * @return 用户实体类
      */
     User getUser(String username);
+
+    /**
+     * 获取各文件夹中邮件计数
+     *
+     * @param store 用户邮箱空间
+     * @return 邮件计数
+     */
+    Map<String, Integer> getMessageCount(IMAPStore store);
 }
