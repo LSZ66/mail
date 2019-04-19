@@ -50,8 +50,8 @@ public class UserServiceImpl implements UserService {
         return repository.findByEmail(username + Constant.MAIL_SUFFIX);
     }
 
-    private Folder openFolder(IMAPStore store) throws MessagingException {
-        Folder folder = store.getFolder(Constant.INBOX);
+    private Folder openFolder(IMAPStore store, String box) throws MessagingException {
+        Folder folder = store.getFolder(box);
         if (!folder.exists()) {
             folder.create(Folder.HOLDS_MESSAGES);
         }
@@ -61,26 +61,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<String, Integer> getMessageCount(IMAPStore store) {
+
         Map<String, Integer> map = new HashMap<>(4);
         try {
-            Folder folder = store.getFolder(Constant.INBOX);
-            if (!folder.exists()) {
-                folder.create(Folder.HOLDS_MESSAGES);
-            }
-            folder.open(Folder.READ_WRITE);
+            Folder folder = openFolder(store, Constant.INBOX);
             map.put("unread", folder.getNewMessageCount());
             map.put("inbox", folder.getMessageCount());
             folder.close();
-            folder = store.getFolder(Constant.OUTBOX);
-            if (!folder.exists()) {
-                folder.create(Folder.HOLDS_MESSAGES);
-            }
+            folder = openFolder(store, Constant.OUTBOX);
             map.put("outbox", folder.getMessageCount());
             folder.close();
-            folder = store.getFolder(Constant.DRAFT_BOX);
-            if (!folder.exists()) {
-                folder.create(Folder.HOLDS_MESSAGES);
-            }
+            folder = openFolder(store, Constant.DRAFT_BOX);
             map.put("draft", folder.getMessageCount());
             folder.close();
         } catch (MessagingException e) {

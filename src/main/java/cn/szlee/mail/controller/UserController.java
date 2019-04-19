@@ -59,8 +59,11 @@ public class UserController {
     }
 
     @GetMapping("/overview")
-    public Map<String, Integer> getOverview(HttpSession session) throws MessagingException {
+    public Map<String, Integer> getOverview(HttpSession session) {
         String userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail == null) {
+            return null;
+        }
         String password = (String) session.getAttribute("password");
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setHost(Constant.DOMAIN);

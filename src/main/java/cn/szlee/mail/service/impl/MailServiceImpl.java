@@ -8,6 +8,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.stereotype.Service;
 
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
+
 
 /**
  * <b><code>MailServiceImpl</code></b>
@@ -176,6 +178,7 @@ public class MailServiceImpl implements MailService {
                 folder.open(Folder.READ_ONLY);
             }
             MimeMessage message = (MimeMessage) folder.getMessage(id);
+            message.setFlags(new Flags(Flags.Flag.SEEN), true);
             mail.setId(id);
             mail.setSubject(MailUtil.getSubject(message));
             mail.setFrom(MailUtil.getFullFrom(message));

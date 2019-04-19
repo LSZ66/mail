@@ -12,6 +12,7 @@ package cn.szlee.mail.config;
  */
 public class Constant {
 
+    public static final String IP = "10.0.0.8";
     public static final String DOMAIN = "szlee.cn";
     public static final String MAIL_SUFFIX = "@" + DOMAIN;
     public static final String IMAP = "imap";
