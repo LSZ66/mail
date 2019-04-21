@@ -21,7 +21,6 @@ public class Mail {
     private String subject;
     private String receiveTime;
     private String sendTime;
-    private String lastModifyTime;
     private String deleteTime;
     private String text;
     private Integer state;

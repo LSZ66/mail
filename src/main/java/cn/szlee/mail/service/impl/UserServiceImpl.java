@@ -27,18 +27,22 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository repo;
 
     @Override
     public User queryForLogin(String username, String password) {
-        return repository.findByEmailAndPassword(username + Constant.MAIL_SUFFIX, password);
+        return repo.findByEmailAndPassword(username + Constant.MAIL_SUFFIX, password);
     }
 
     @Override
     public boolean register(String username, String password) {
         if (getUser(username) == null) {
             String email = username + Constant.MAIL_SUFFIX;
-            repository.insert(email, password);
+            User user = new User();
+            user.setEmail(email);
+            String encrypt = new String(repo.getEncryptPassword(password));
+            user.setPassword(encrypt);
+            repo.save(user);
             return true;
         } else {
             return false;
@@ -47,7 +51,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUser(String username) {
-        return repository.findByEmail(username + Constant.MAIL_SUFFIX);
+        return repo.findByEmail(username + Constant.MAIL_SUFFIX);
+    }
+
+    @Override
+    public User getUser(int id) {
+        return repo.getOne(id);
     }
 
     private Folder openFolder(IMAPStore store, String box) throws MessagingException {
@@ -61,7 +70,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<String, Integer> getMessageCount(IMAPStore store) {
-
         Map<String, Integer> map = new HashMap<>(4);
         try {
             Folder folder = openFolder(store, Constant.INBOX);
@@ -78,5 +86,21 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
         return map;
+    }
+
+    @Override
+    public void updateName(int id, String name) {
+        User user = repo.getOne(id);
+        user.setName(name);
+        repo.save(user);
+    }
+
+    @Override
+    public void updateInfo(User newInfo) {
+        String encrypt = new String(repo.getEncryptPassword(newInfo.getPassword()));
+        User user = repo.getOne(newInfo.getId());
+        user.setName(newInfo.getName());
+        user.setPassword(encrypt);
+        repo.save(user);
     }
 }

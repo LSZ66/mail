@@ -37,7 +37,7 @@ public class MailUtil {
      */
     public static IMAPStore getStore(String username, String password) throws MessagingException {
         Properties props = System.getProperties();
-        props.setProperty("mail.imap.host", Constant.DOMAIN);
+        props.setProperty("mail.imap.host", Constant.HOST);
         props.setProperty("mail.imap.port", "993");
         props.setProperty("mail.imap.ssl.enable", "true");
         props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -64,7 +64,7 @@ public class MailUtil {
      * @param msg 邮件内容
      * @return 若存在用户签名，则返回用户签名，否则返回邮箱地址
      */
-    public static String getFrom(MimeMessage msg) throws MessagingException {
+    public static String getFrom(Message msg) throws MessagingException {
         Address[] froms = msg.getFrom();
         if (froms.length < 1) {
             return "没有发件人";
@@ -106,7 +106,7 @@ public class MailUtil {
      * @param msg 邮件内容
      * @return 收件人1 <邮件地址1>, 收件人2 <邮件地址2>, ...
      */
-    public static String getReceiveAddress(MimeMessage msg) throws MessagingException {
+    public static String getReceiveAddress(Message msg) throws MessagingException {
         StringBuilder receiveAddress = new StringBuilder();
         Address[] address = msg.getAllRecipients();
 
@@ -129,7 +129,7 @@ public class MailUtil {
      * @param msg 邮件内容
      * @return yyyy年mm月dd日 星期X HH:mm
      */
-    public static String getSentDate(MimeMessage msg) throws MessagingException {
+    public static String getSentDate(Message msg) throws MessagingException {
         Date receivedDate = msg.getSentDate();
         if (receivedDate == null) {
             return "-";
@@ -179,7 +179,7 @@ public class MailUtil {
      * @param msg 邮件体
      * @return 如果邮件已读返回true, 否则返回false
      */
-    public static boolean isSeen(MimeMessage msg) throws MessagingException {
+    public static boolean isSeen(Message msg) throws MessagingException {
         return msg.getFlags().contains(Flags.Flag.SEEN);
     }
 
@@ -189,7 +189,7 @@ public class MailUtil {
      * @param msg 邮件体
      * @return 如果邮件已回复返回true, 否则返回false
      */
-    public static boolean isAnswered(MimeMessage msg) throws MessagingException {
+    public static boolean isAnswered(Message msg) throws MessagingException {
         return msg.getFlags().contains(Flags.Flag.ANSWERED);
     }
 }

@@ -42,10 +42,33 @@ public interface UserService {
     User getUser(String username);
 
     /**
+     * 通过id获取用户实体类
+     *
+     * @param id 用户id
+     * @return 用户实体类
+     */
+    User getUser(int id);
+
+    /**
      * 获取各文件夹中邮件计数
      *
      * @param store 用户邮箱空间
      * @return 邮件计数
      */
     Map<String, Integer> getMessageCount(IMAPStore store);
+
+    /**
+     * 更新用户发件姓名
+     *
+     * @param id    用户id
+     * @param name  发件姓名
+     */
+    void updateName(int id, String name);
+
+    /**
+     * 更新用户信息
+     *
+     * @param user 用户实体类
+     */
+    void updateInfo(User user);
 }

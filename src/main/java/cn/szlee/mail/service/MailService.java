@@ -38,10 +38,11 @@ public interface MailService {
     Mail getMessageById(String box, int id, IMAPStore store);
 
     /**
-     * 将邮件保存到发件箱
+     * 将邮件保存到指定文件夹
      *
-     * @param message 邮件体
-     * @param store   用户邮箱空间
+     * @param store     用户邮件空间
+     * @param box       文件夹
+     * @param message   信息
      */
-    void saveToOutbox(MimeMessage message, IMAPStore store);
+    void saveToBox(IMAPStore store, String box, MimeMessage... message);
 }

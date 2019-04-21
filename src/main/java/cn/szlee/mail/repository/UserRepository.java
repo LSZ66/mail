@@ -3,9 +3,7 @@ package cn.szlee.mail.repository;
 import cn.szlee.mail.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author 李尚哲
@@ -14,18 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
 
     /**
-     * 新增用户
+     * 获取加密的密码
      *
-     * @param email    用户名
-     * @param password 密码
+     * @param password  明文密码
+     * @return 加密的密码
      */
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    @Query(value =
-            "insert into virtual_users(domain_id, email, password) " +
-                    "value(1, ?1, ENCRYPT(?2, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16))))",
-            nativeQuery = true)
-    void insert(String email, String password);
+    @Query(value = "SELECT ENCRYPT(?1, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)))", nativeQuery = true)
+    char[] getEncryptPassword(String password);
 
     /**
      * 根据email查找用户

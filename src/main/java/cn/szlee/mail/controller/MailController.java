@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * <b><code>MailController</code></b>
  * <p/>
- * Description
+ * 邮件控制器类
  * <p/>
  * <b>Creation Time:</b> 2019-04-14 20:01.
  *
@@ -61,6 +61,6 @@ public class MailController {
         helper.setText(mail.getText(), true);
         sender.send(message);
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.saveToOutbox(message, userStore);
+        service.saveToBox(userStore, Constant.OUTBOX, message);
     }
 }

@@ -40,9 +40,6 @@ public class MailServiceImpl implements MailService {
             case "outbox":
                 box = Constant.OUTBOX;
                 break;
-            case "draft":
-                box = Constant.DRAFT_BOX;
-                break;
             case "spam":
                 box = Constant.SPAM_BOX;
                 break;
@@ -61,75 +58,16 @@ public class MailServiceImpl implements MailService {
     }
 
     /**
-     * 封装接收类邮件（收件/垃圾邮件）
+     * 封装接收类邮件
      *
      * @param message 邮件体
      * @return 邮件实体类
      */
-    private Mail setReceiveMail(Message message) throws MessagingException, UnsupportedEncodingException {
+    private Mail setMail(Message message) throws MessagingException, UnsupportedEncodingException {
         MimeMessage msg = (MimeMessage) message;
         Mail mail = new Mail();
         mail.setId(msg.getMessageNumber());
-        mail.setFrom(MailUtil.getFrom(msg));
         mail.setSubject(MailUtil.getSubject(msg));
-        mail.setReceiveTime(MailUtil.getSentDate(msg));
-        int state = 0;
-        if (MailUtil.isSeen(msg)) {
-            if (MailUtil.isAnswered(msg)) {
-                state = 2;
-            } else {
-                state = 1;
-            }
-        }
-        mail.setState(state);
-        return mail;
-    }
-
-    /**
-     * 封装发送的邮件
-     *
-     * @param message 邮件体
-     * @return 邮件实体类
-     */
-    private Mail setSendMail(Message message) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage msg = (MimeMessage) message;
-        Mail mail = new Mail();
-        mail.setId(msg.getMessageNumber());
-        mail.setTo(MailUtil.getReceiveAddress(msg));
-        mail.setSubject(MailUtil.getSubject(msg));
-        mail.setSendTime(MailUtil.getSentDate(msg));
-        return mail;
-    }
-
-    /**
-     * 封装草稿邮件
-     *
-     * @param message 邮件体
-     * @return 邮件实体类
-     */
-    private Mail setDraftMail(Message message) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage msg = (MimeMessage) message;
-        Mail mail = new Mail();
-        mail.setId(msg.getMessageNumber());
-        mail.setFrom(MailUtil.getFrom(msg));
-        mail.setSubject(MailUtil.getSubject(msg));
-        mail.setLastModifyTime(MailUtil.getSentDate(msg));
-        return mail;
-    }
-
-    /**
-     * 封装回收站邮件
-     *
-     * @param message 邮件体
-     * @return 邮件实体类
-     */
-    private Mail setRecycleMail(Message message) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage msg = (MimeMessage) message;
-        Mail mail = new Mail();
-        mail.setId(msg.getMessageNumber());
-        mail.setFrom(MailUtil.getFrom(msg));
-        mail.setSubject(MailUtil.getSubject(msg));
-        mail.setDeleteTime(MailUtil.getSentDate(msg));
         return mail;
     }
 
@@ -146,16 +84,27 @@ public class MailServiceImpl implements MailService {
                 switch (box) {
                     case "inbox":
                     case "spam":
-                        mail = setReceiveMail(message);
+                        mail = setMail(message);
+                        mail.setFrom(MailUtil.getFrom(message));
+                        mail.setReceiveTime(MailUtil.getSentDate(message));
+                        int state = 0;
+                        if (MailUtil.isSeen(message)) {
+                            if (MailUtil.isAnswered(message)) {
+                                state = 2;
+                            } else {
+                                state = 1;
+                            }
+                        }
+                        mail.setState(state);
                         break;
                     case "outbox":
-                        mail = setSendMail(message);
-                        break;
-                    case "draft":
-                        mail = setDraftMail(message);
+                        mail = setMail(message);
+                        mail.setTo(MailUtil.getReceiveAddress(message));
+                        mail.setSendTime(MailUtil.getSentDate(message));
                         break;
                     case "recycle":
-                        mail = setRecycleMail(message);
+                        mail = setMail(message);
+                        mail.setDeleteTime(MailUtil.getSentDate(message));
                         break;
                     default:
                         mail = null;
@@ -193,13 +142,13 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void saveToOutbox(MimeMessage message, IMAPStore store) {
+    public void saveToBox(IMAPStore store, String box, MimeMessage... message) {
         try {
-            IMAPFolder folder = getFolder("outbox", store);
+            IMAPFolder folder = getFolder(box, store);
             if (!folder.exists()) {
                 folder.create(Folder.HOLDS_MESSAGES);
             }
-            folder.appendMessages(new Message[]{message});
+            folder.appendMessages(message);
             folder.close();
         } catch (MessagingException e) {
             e.printStackTrace();
