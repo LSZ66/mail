@@ -109,8 +109,9 @@ public class UserController {
     @PutMapping("/updateInfo")
     public boolean updateInfo(@RequestBody Map<String, String> req, HttpSession session) throws InvocationTargetException, IllegalAccessException {
         String oldPassword = (String) session.getAttribute("password");
+        String old = req.get("old");
         System.out.println(req);
-        if (!oldPassword.equals(req.get("old"))) {
+        if (!oldPassword.equals(old)) {
             return false;
         }
         User user = new User();
