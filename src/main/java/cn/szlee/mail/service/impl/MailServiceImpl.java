@@ -131,7 +131,7 @@ public class MailServiceImpl implements MailService {
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
             mail.setReceiveTime(MailUtil.getSentDate(message));
-            mail.setText(MailUtil.getMailTextContent(message));
+            mail.setText(MailUtil.getHtmlContent(message));
             folder.close();
         } catch (MessagingException | IOException e) {
             e.printStackTrace();

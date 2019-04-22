@@ -12,7 +12,7 @@ package cn.szlee.mail.config;
  */
 public class Constant {
 
-    public static final String HOST = "szlee.cn";
+    public static final String HOST = "10.0.0.8";
     public static final String MAIL_SUFFIX = "@szlee.cn";
     public static final String IMAP = "imap";
     public static final String INBOX = "INBOX";
@@ -20,7 +20,7 @@ public class Constant {
     public static final String DRAFT_BOX = "草稿箱";
     public static final String SPAM_BOX = "垃圾箱";
     public static final String RECYCLE = "回收站";
-    public static final String MAIL_TEXT = "text/*";
+    public static final String MAIL_TEXT = "text/html";
     public static final String MAIL_RFC822 = "message/rfc822";
     public static final String MAIL_MULTIPART = "multipart/*";
     public static final String UTF8 = "UTF-8";
