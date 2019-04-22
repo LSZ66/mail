@@ -40,11 +40,17 @@ public class DraftController {
 
     @GetMapping("/getById/{id}")
     public Draft getById(@PathVariable Integer id) {
+        System.out.println(service.getById(id));
         return service.getById(id);
     }
 
     @PutMapping
     public void update(@RequestBody Draft draft) {
         service.save(draft);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id) {
+        service.deleteById(id);
     }
 }

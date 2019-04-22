@@ -45,4 +45,31 @@ public interface MailService {
      * @param message   信息
      */
     void saveToBox(IMAPStore store, String box, MimeMessage... message);
+
+    /**
+     * 移动邮件
+     *
+     * @param store   用户邮件空间
+     * @param srcBox  源文件夹
+     * @param destBox 目标文件夹
+     * @param msgIds  邮件id
+     */
+    void moveToBox(IMAPStore store, String srcBox, String destBox, int... msgIds);
+
+    /**
+     * 删除邮件
+     *
+     * @param store  用户邮件空间
+     * @param box    文件夹
+     * @param msgIds 邮件id
+     */
+    void delete(IMAPStore store, String box, int... msgIds);
+
+    /**
+     * 设置收件箱邮件已读
+     *
+     * @param store  用户邮件空间
+     * @param msgIds 邮件id
+     */
+    void setSeen(IMAPStore store, int... msgIds);
 }

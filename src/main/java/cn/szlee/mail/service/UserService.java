@@ -71,4 +71,13 @@ public interface UserService {
      * @param user 用户实体类
      */
     void updateInfo(User user);
+
+    /**
+     * 获取用户的smtp和imap服务
+     *
+     * @param email    用户邮箱
+     * @param password 密码
+     * @return Sender和Store
+     */
+    Map<String, Object> getSenderAndReceiver(String email, String password);
 }

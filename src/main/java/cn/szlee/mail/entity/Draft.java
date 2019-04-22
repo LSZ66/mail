@@ -1,7 +1,9 @@
 package cn.szlee.mail.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -19,11 +21,12 @@ import java.sql.Timestamp;
  */
 @Entity
 @Data
+@ToString
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 public class Draft {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column
@@ -40,5 +43,6 @@ public class Draft {
 
     @Column
     @UpdateTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", locale = "zh", timezone = "GMT+8")
     private Timestamp lastModifyTime;
 }

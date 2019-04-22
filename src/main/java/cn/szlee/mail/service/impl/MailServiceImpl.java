@@ -47,7 +47,7 @@ public class MailServiceImpl implements MailService {
                 box = Constant.RECYCLE;
                 break;
             default:
-                throw new MessagingException("没有此文件夹");
+                break;
         }
         IMAPFolder folder = (IMAPFolder) store.getFolder(box);
         if (!folder.exists()) {
@@ -83,7 +83,6 @@ public class MailServiceImpl implements MailService {
                 Mail mail;
                 switch (box) {
                     case "inbox":
-                    case "spam":
                         mail = setMail(message);
                         mail.setFrom(MailUtil.getFrom(message));
                         mail.setReceiveTime(MailUtil.getSentDate(message));
@@ -103,8 +102,10 @@ public class MailServiceImpl implements MailService {
                         mail.setSendTime(MailUtil.getSentDate(message));
                         break;
                     case "recycle":
+                    case "spam":
                         mail = setMail(message);
-                        mail.setDeleteTime(MailUtil.getSentDate(message));
+                        mail.setFrom(MailUtil.getFrom(message));
+                        mail.setReceiveTime(MailUtil.getSentDate(message));
                         break;
                     default:
                         mail = null;
@@ -123,9 +124,6 @@ public class MailServiceImpl implements MailService {
         Mail mail = new Mail();
         try {
             IMAPFolder folder = getFolder(box, store);
-            if (!folder.isOpen()) {
-                folder.open(Folder.READ_ONLY);
-            }
             MimeMessage message = (MimeMessage) folder.getMessage(id);
             message.setFlags(new Flags(Flags.Flag.SEEN), true);
             mail.setId(id);
@@ -145,10 +143,44 @@ public class MailServiceImpl implements MailService {
     public void saveToBox(IMAPStore store, String box, MimeMessage... message) {
         try {
             IMAPFolder folder = getFolder(box, store);
-            if (!folder.exists()) {
-                folder.create(Folder.HOLDS_MESSAGES);
-            }
             folder.appendMessages(message);
+            folder.close();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void moveToBox(IMAPStore store, String srcBox, String destBox, int... msgIds) {
+        try {
+            IMAPFolder srcFolder = getFolder(srcBox, store);
+            IMAPFolder destFolder = getFolder(destBox, store);
+            Message[] messages = srcFolder.getMessages();
+            srcFolder.copyMessages(messages, destFolder);
+            srcFolder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
+            srcFolder.close();
+            destFolder.close();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void delete(IMAPStore store, String box, int... msgIds) {
+        try {
+            IMAPFolder folder = getFolder(box, store);
+            folder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
+            folder.close();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setSeen(IMAPStore store, int... msgIds) {
+        try {
+            IMAPFolder folder = getFolder(Constant.INBOX, store);
+            folder.setFlags(msgIds, new Flags(Flags.Flag.SEEN), true);
             folder.close();
         } catch (MessagingException e) {
             e.printStackTrace();

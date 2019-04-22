@@ -1,20 +1,16 @@
 package cn.szlee.mail.controller;
 
-import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.User;
 import cn.szlee.mail.service.UserService;
-import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPStore;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * <b><code>UserController</code></b>
@@ -72,25 +68,21 @@ public class UserController {
         if (userEmail == null) {
             return null;
         }
-        String password = (String) session.getAttribute("password");
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost(Constant.HOST);
-        Properties mailProps = new Properties();
-        mailProps.put("mail.smtp.auth", true);
-        mailProps.put("mail.smtp.starttls.enable", true);
-        sender.setJavaMailProperties(mailProps);
-        sender.setUsername(userEmail);
-        sender.setPassword(password);
-        session.setAttribute("userSender", sender);
-        IMAPStore store;
-        try {
-            store = MailUtil.getStore(userEmail, password);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            return null;
+        JavaMailSender userSender = (JavaMailSender) session.getAttribute("userSender");
+        Map<String, Integer> overview;
+        if (userSender == null) {
+            String password = (String) session.getAttribute("password");
+            Map<String, Object> map = service.getSenderAndReceiver(userEmail, password);
+            Object sender = map.get("sender");
+            Object store = map.get("store");
+            session.setAttribute("userSender", sender);
+            session.setAttribute("userStore", store);
+            overview = service.getMessageCount((IMAPStore) store);
+        } else {
+            IMAPStore store = (IMAPStore) session.getAttribute("userStore");
+            overview = service.getMessageCount(store);
         }
-        session.setAttribute("userStore", store);
-        return service.getMessageCount(store);
+        return overview;
     }
 
     @GetMapping("/logout")

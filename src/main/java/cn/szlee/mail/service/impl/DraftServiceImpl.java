@@ -38,4 +38,9 @@ public class DraftServiceImpl implements DraftService {
     public Draft getById(int id) {
         return repo.getOne(id);
     }
+
+    @Override
+    public void deleteById(int id) {
+        repo.deleteById(id);
+    }
 }

@@ -4,14 +4,17 @@ import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.User;
 import cn.szlee.mail.repository.UserRepository;
 import cn.szlee.mail.service.UserService;
+import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * <b><code>UserServiceImpl</code></b>
@@ -102,5 +105,28 @@ public class UserServiceImpl implements UserService {
         user.setName(newInfo.getName());
         user.setPassword(encrypt);
         repo.save(user);
+    }
+
+    @Override
+    public Map<String, Object> getSenderAndReceiver(String email, String password) {
+        Map<String, Object> map = new HashMap<>(2);
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setHost(Constant.HOST);
+        Properties mailProps = new Properties();
+        mailProps.put("mail.smtp.auth", true);
+        mailProps.put("mail.smtp.starttls.enable", true);
+        sender.setJavaMailProperties(mailProps);
+        sender.setUsername(email);
+        sender.setPassword(password);
+        IMAPStore store = null;
+        try {
+            sender.testConnection();
+            store = MailUtil.getStore(email, password);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        map.put("sender", sender);
+        map.put("store", store);
+        return map;
     }
 }

@@ -15,7 +15,7 @@ import javax.persistence.*;
 @ToString
 public class Domain {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, nullable = false)
     private Integer id;
 

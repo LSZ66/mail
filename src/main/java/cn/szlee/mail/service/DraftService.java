@@ -38,4 +38,11 @@ public interface DraftService {
      * @return 稿件实体类
      */
     Draft getById(int id);
+
+    /**
+     * 根据id删除稿件
+     *
+     * @param id 稿件id
+     */
+    void deleteById(int id);
 }

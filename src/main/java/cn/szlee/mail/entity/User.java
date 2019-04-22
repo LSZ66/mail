@@ -15,7 +15,7 @@ import javax.persistence.*;
 @ToString
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, nullable = false)
     private Integer id;
 

@@ -63,4 +63,22 @@ public class MailController {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         service.saveToBox(userStore, Constant.OUTBOX, message);
     }
+
+    @PutMapping("/setSeen")
+    public void setSeen(@RequestBody int[] msgIds, HttpSession session) {
+        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
+        service.setSeen(userStore, msgIds);
+    }
+
+    @PutMapping("/move/{src}/{dest}")
+    public void move(@PathVariable String src, @PathVariable String dest, @RequestBody int[] msgIds, HttpSession session) {
+        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
+        service.moveToBox(userStore, src, dest, msgIds);
+    }
+
+    @DeleteMapping("/delete/{box}")
+    public void delete(@PathVariable String box, @RequestBody int[] msgIds, HttpSession session) {
+        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
+        service.delete(userStore, box, msgIds);
+    }
 }
