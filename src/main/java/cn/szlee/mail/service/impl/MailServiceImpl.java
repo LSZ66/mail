@@ -13,6 +13,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.search.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
@@ -85,7 +86,7 @@ public class MailServiceImpl implements MailService {
                     case "inbox":
                         mail = setMail(message);
                         mail.setFrom(MailUtil.getFrom(message));
-                        mail.setReceiveTime(MailUtil.getSentDate(message));
+                        mail.setReceiveTime(MailUtil.getDateTime(message));
                         int state = 0;
                         if (MailUtil.isSeen(message)) {
                             if (MailUtil.isAnswered(message)) {
@@ -99,13 +100,13 @@ public class MailServiceImpl implements MailService {
                     case "outbox":
                         mail = setMail(message);
                         mail.setTo(MailUtil.getReceiveAddress(message));
-                        mail.setSendTime(MailUtil.getSentDate(message));
+                        mail.setSendTime(MailUtil.getDateTime(message));
                         break;
                     case "recycle":
                     case "spam":
                         mail = setMail(message);
                         mail.setFrom(MailUtil.getFrom(message));
-                        mail.setReceiveTime(MailUtil.getSentDate(message));
+                        mail.setReceiveTime(MailUtil.getDateTime(message));
                         break;
                     default:
                         mail = null;
@@ -130,7 +131,7 @@ public class MailServiceImpl implements MailService {
             mail.setSubject(MailUtil.getSubject(message));
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
-            mail.setReceiveTime(MailUtil.getSentDate(message));
+            mail.setReceiveTime(MailUtil.getDateTime(message));
             mail.setText(MailUtil.getHtmlContent(message));
             folder.close();
         } catch (MessagingException | IOException e) {
@@ -155,10 +156,10 @@ public class MailServiceImpl implements MailService {
         try {
             IMAPFolder srcFolder = getFolder(srcBox, store);
             IMAPFolder destFolder = getFolder(destBox, store);
-            Message[] messages = srcFolder.getMessages();
+            Message[] messages = srcFolder.getMessages(msgIds);
             srcFolder.copyMessages(messages, destFolder);
             srcFolder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
-            srcFolder.close();
+            srcFolder.close(true);
             destFolder.close();
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -170,7 +171,7 @@ public class MailServiceImpl implements MailService {
         try {
             IMAPFolder folder = getFolder(box, store);
             folder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
-            folder.close();
+            folder.close(true);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
@@ -185,5 +186,37 @@ public class MailServiceImpl implements MailService {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<Mail> search(IMAPStore store, String box, String pattern) {
+        List<Mail> list = new LinkedList<>();
+        try {
+            IMAPFolder folder = getFolder(box, store);
+            SearchTerm term = new OrTerm(new SearchTerm[]{
+                    new FromStringTerm(pattern),
+                    new SubjectTerm(pattern),
+                    new BodyTerm(pattern)});
+            Message[] result = folder.search(term);
+            for (Message message : result) {
+                Mail mail = setMail(message);
+                mail.setFrom(MailUtil.getFrom(message));
+                mail.setReceiveTime(MailUtil.getDateTime(message));
+                int state = 0;
+                if (MailUtil.isSeen(message)) {
+                    if (MailUtil.isAnswered(message)) {
+                        state = 2;
+                    } else {
+                        state = 1;
+                    }
+                }
+                mail.setState(state);
+                list.add(0, mail);
+            }
+            folder.close();
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

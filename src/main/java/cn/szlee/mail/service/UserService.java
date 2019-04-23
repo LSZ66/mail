@@ -80,4 +80,12 @@ public interface UserService {
      * @return Sender和Store
      */
     Map<String, Object> getSenderAndReceiver(String email, String password);
+
+    /**
+     * 获取主页邮件信息
+     *
+     * @param store 用户邮件空间
+     * @return 主页邮件数信息
+     */
+    Map<String, Integer> getDateCount(IMAPStore store);
 }

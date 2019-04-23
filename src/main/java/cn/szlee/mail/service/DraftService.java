@@ -45,4 +45,11 @@ public interface DraftService {
      * @param id 稿件id
      */
     void deleteById(int id);
+
+    /**
+     * 根据id删除多个稿件
+     *
+     * @param ids 稿件id
+     */
+    void deleteById(List<Integer> ids);
 }

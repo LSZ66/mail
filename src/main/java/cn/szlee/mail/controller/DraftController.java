@@ -19,7 +19,7 @@ import java.util.List;
  * @since mail ${PROJECT_VERSION}
  */
 @RestController
-@RequestMapping("/draft")
+@RequestMapping("/api/draft")
 public class DraftController {
 
     @Autowired
@@ -52,5 +52,10 @@ public class DraftController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
         service.deleteById(id);
+    }
+
+    @DeleteMapping("/list")
+    public void delete(@RequestBody List<Integer> ids) {
+        service.deleteById(ids);
     }
 }

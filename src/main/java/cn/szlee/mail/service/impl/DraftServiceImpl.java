@@ -43,4 +43,9 @@ public class DraftServiceImpl implements DraftService {
     public void deleteById(int id) {
         repo.deleteById(id);
     }
+
+    @Override
+    public void deleteById(List<Integer> ids) {
+        ids.forEach(id -> repo.deleteById(id));
+    }
 }

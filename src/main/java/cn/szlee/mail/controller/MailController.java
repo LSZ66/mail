@@ -26,7 +26,7 @@ import java.util.List;
  * @since mail 1.0
  */
 @RestController
-@RequestMapping("/mail")
+@RequestMapping("/api/mail")
 @CrossOrigin
 public class MailController {
 
@@ -46,6 +46,12 @@ public class MailController {
         }
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         return service.getMessageById(box, id, userStore);
+    }
+
+    @GetMapping("/search/{box}/{pattern}")
+    public List<Mail> search(@PathVariable String box, @PathVariable String pattern, HttpSession session) {
+        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
+        return service.search(userStore, box, pattern);
     }
 
     @PostMapping

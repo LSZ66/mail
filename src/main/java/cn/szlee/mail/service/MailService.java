@@ -72,4 +72,14 @@ public interface MailService {
      * @param msgIds 邮件id
      */
     void setSeen(IMAPStore store, int... msgIds);
+
+    /**
+     * 搜索邮件内容
+     *
+     * @param store   用户邮件空间
+     * @param box     文件夹
+     * @param pattern 搜索的关键字
+     * @return 搜索到的邮件
+     */
+    List<Mail> search(IMAPStore store, String box, String pattern);
 }

@@ -4,6 +4,7 @@ import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.User;
 import cn.szlee.mail.repository.UserRepository;
 import cn.szlee.mail.service.UserService;
+import cn.szlee.mail.utils.CalenderUtil;
 import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,12 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.search.AndTerm;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.SearchTerm;
+import javax.mail.search.SentDateTerm;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -76,14 +82,11 @@ public class UserServiceImpl implements UserService {
         Map<String, Integer> map = new HashMap<>(4);
         try {
             Folder folder = openFolder(store, Constant.INBOX);
-            map.put("unread", folder.getNewMessageCount());
+            map.put("unread", folder.getUnreadMessageCount());
             map.put("inbox", folder.getMessageCount());
             folder.close();
             folder = openFolder(store, Constant.OUTBOX);
             map.put("outbox", folder.getMessageCount());
-            folder.close();
-            folder = openFolder(store, Constant.DRAFT_BOX);
-            map.put("draft", folder.getMessageCount());
             folder.close();
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -120,13 +123,39 @@ public class UserServiceImpl implements UserService {
         sender.setPassword(password);
         IMAPStore store = null;
         try {
-            sender.testConnection();
             store = MailUtil.getStore(email, password);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
         map.put("sender", sender);
         map.put("store", store);
+        return map;
+    }
+
+    @Override
+    public Map<String, Integer> getDateCount(IMAPStore store) {
+        SearchTerm ge = new SentDateTerm(ComparisonTerm.GE, CalenderUtil.twoWeeksBefore());
+        SearchTerm le = new SentDateTerm(ComparisonTerm.LE, CalenderUtil.now());
+        SearchTerm term = new AndTerm(ge, le);
+        Folder folder;
+        Map<String, Integer> map = new HashMap<>();
+        try {
+            folder = openFolder(store, Constant.INBOX);
+            Message[] messages = folder.search(term);
+            for (Message message : messages) {
+                String date = MailUtil.getDate(message);
+                map.merge(date, 1, Integer::sum);
+            }
+            folder.close();
+            folder = openFolder(store, Constant.OUTBOX);
+            messages = folder.search(term);
+            for (Message message : messages) {
+                String date = MailUtil.getDate(message);
+                map.merge(date, 1, Integer::sum);
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
         return map;
     }
 }

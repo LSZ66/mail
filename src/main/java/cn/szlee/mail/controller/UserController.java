@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <b><code>UserController</code></b>
@@ -23,7 +23,7 @@ import java.util.Map;
  * @since mail 1.0
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @CrossOrigin
 public class UserController {
 
@@ -120,5 +120,19 @@ public class UserController {
         user.setId(userId);
         service.updateInfo(user);
         return true;
+    }
+
+    @GetMapping("/dateCount")
+    public List<Map> getDateCount(HttpSession session) {
+        IMAPStore store = (IMAPStore) session.getAttribute("userStore");
+        Set<Map.Entry<String, Integer>> entries = service.getDateCount(store).entrySet();
+        List<Map> list = new ArrayList<>();
+        entries.forEach(item -> {
+            HashMap<String, Object> map = new HashMap<>(1);
+            map.put("date", item.getKey());
+            map.put("acc", item.getValue());
+            list.add(map);
+        });
+        return list;
     }
 }

@@ -124,12 +124,27 @@ public class MailUtil {
     }
 
     /**
-     * 获得邮件发送时间
+     * 获得邮件发送日期
      *
      * @param msg 邮件内容
-     * @return yyyy年mm月dd日 星期X HH:mm
+     * @return yyyy-mm-dd
      */
-    public static String getSentDate(Message msg) throws MessagingException {
+    public static String getDate(Message msg) throws MessagingException {
+        Date receivedDate = msg.getSentDate();
+        if (receivedDate == null) {
+            return "-";
+        }
+
+        return new SimpleDateFormat("yyyy-MM-dd").format(receivedDate);
+    }
+
+    /**
+     * 获得邮件发送日期时间
+     *
+     * @param msg 邮件内容
+     * @return yyyy-mm-dd 星期X HH:mm
+     */
+    public static String getDateTime(Message msg) throws MessagingException {
         Date receivedDate = msg.getSentDate();
         if (receivedDate == null) {
             return "-";
