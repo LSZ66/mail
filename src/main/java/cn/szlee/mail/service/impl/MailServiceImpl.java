@@ -3,7 +3,9 @@ package cn.szlee.mail.service.impl;
 import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
+import cn.szlee.mail.utils.BayesUtil;
 import cn.szlee.mail.utils.MailUtil;
+import cn.szlee.mail.utils.WordsUtil;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import org.springframework.stereotype.Service;
@@ -138,10 +140,14 @@ public class MailServiceImpl implements MailService {
             mail.setText(MailUtil.getHtmlContent(message));
             if (check) {
                 //检查是否为垃圾邮件
-                /*List<String> separate = WordsUtil.separate(mail.getText());*/
-                message.writeTo(System.out);
+                List<String> separate = WordsUtil.separate(mail.getText());
+                var bayes = BayesUtil.getBayes();
+                String category = bayes.classify(separate).getCategory();
+                String spam = "spam";
+                if (spam.equals(category)) {
+                    mail.setState(1);
+                }
             }
-            message.writeTo(System.out);
             folder.close();
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
