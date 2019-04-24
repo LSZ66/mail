@@ -114,7 +114,7 @@ public class MailServiceImpl implements MailService {
                 list.add(0, mail);
             }
             folder.close();
-        } catch (MessagingException | UnsupportedEncodingException e) {
+        } catch (MessagingException | IOException e) {
             e.printStackTrace();
         }
         return list;
@@ -126,13 +126,22 @@ public class MailServiceImpl implements MailService {
         try {
             IMAPFolder folder = getFolder(box, store);
             MimeMessage message = (MimeMessage) folder.getMessage(id);
-            message.setFlags(new Flags(Flags.Flag.SEEN), true);
             mail.setId(id);
             mail.setSubject(MailUtil.getSubject(message));
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
             mail.setReceiveTime(MailUtil.getDateTime(message));
+            boolean check = true;
+            if (MailUtil.isSeen(message)) {
+                check = false;
+            }
             mail.setText(MailUtil.getHtmlContent(message));
+            if (check) {
+                //检查是否为垃圾邮件
+                /*List<String> separate = WordsUtil.separate(mail.getText());*/
+                message.writeTo(System.out);
+            }
+            message.writeTo(System.out);
             folder.close();
         } catch (MessagingException | IOException e) {
             e.printStackTrace();

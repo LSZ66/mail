@@ -19,16 +19,13 @@ import java.util.List;
  * @since mail 1.0
  */
 @Component
-public class SeparateWords {
+public class WordsUtil {
 
-    private static List<String> separate(String mail) {
-        List<Word> seg = WordSegmenter.seg(mail);
+    public static List<String> separate(String htmlMail) {
+        String text = HtmlUtil.getTextFromHtml(htmlMail);
+        List<Word> seg = WordSegmenter.seg(text);
         List<String> words = new ArrayList<>();
         seg.forEach(item -> words.add(item.getText()));
         return words;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(SeparateWords.separate("你好，本期彩票开猴，你猜中了吗，我们连中四环，加微信，低价给你下期开什么"));
     }
 }
