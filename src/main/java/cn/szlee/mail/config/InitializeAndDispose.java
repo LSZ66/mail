@@ -1,6 +1,7 @@
 package cn.szlee.mail.config;
 
 import cn.szlee.mail.utils.BayesUtil;
+import org.apdplat.word.WordSegmenter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -27,7 +28,7 @@ class InitializeAndDispose implements CommandLineRunner, DisposableBean {
     @Override
     public void run(String... args) {
         LOGGER.info("开始初始化分词器");
-        //WordSegmenter.seg("你好");
+        WordSegmenter.seg("你好");
         try {
             LOGGER.info("开始加载朴素贝叶斯分类器");
             BayesUtil.load();

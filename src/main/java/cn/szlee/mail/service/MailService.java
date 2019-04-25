@@ -40,9 +40,9 @@ public interface MailService {
     /**
      * 将邮件保存到指定文件夹
      *
-     * @param store     用户邮件空间
-     * @param box       文件夹
-     * @param message   信息
+     * @param store   用户邮件空间
+     * @param box     文件夹
+     * @param message 信息
      */
     void saveToBox(IMAPStore store, String box, MimeMessage... message);
 
@@ -86,10 +86,10 @@ public interface MailService {
     /**
      * 标记一封邮件为垃圾/普通邮件
      *
-     * @param store 用户邮件空间
-     * @param box   文件夹
-     * @param id    邮件id
-     * @param type  类型：垃圾邮件或正常邮件
+     * @param store  用户邮件空间
+     * @param box    文件夹
+     * @param type   类型：垃圾邮件或正常邮件
+     * @param msgIds 邮件id
      */
-    void markAs(IMAPStore store, String box, int id, String type);
+    void markAs(IMAPStore store, String box, String type, int... msgIds);
 }

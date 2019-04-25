@@ -88,12 +88,12 @@ public class MailController {
         service.delete(userStore, box, msgIds);
     }
 
-    @PatchMapping("/mark/{box}/{id}/{type}")
-    public void markAsSpam(@PathVariable String box,
-                           @PathVariable Integer id,
-                           @PathVariable String type,
-                           HttpSession session) {
+    @PatchMapping("/mark/{box}/{type}")
+    public void markAs(@PathVariable String box,
+                       @PathVariable String type,
+                       @RequestBody int[] msgIds,
+                       HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.markAs(userStore, box, id, type);
+        service.markAs(userStore, box, type, msgIds);
     }
 }

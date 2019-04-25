@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -86,7 +87,9 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public void logout(HttpSession session) {
+    public void logout(HttpSession session) throws MessagingException {
+        IMAPStore store = (IMAPStore) session.getAttribute("userStore");
+        store.close();
         session.removeAttribute("userName");
         session.removeAttribute("userId");
         session.removeAttribute("userEmail");

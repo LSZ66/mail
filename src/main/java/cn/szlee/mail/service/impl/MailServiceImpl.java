@@ -239,13 +239,16 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void markAs(IMAPStore store, String box, int id, String type) {
+    public void markAs(IMAPStore store, String box, String type, int... msgIds) {
         try {
             IMAPFolder folder = getFolder(box, store);
-            Message message = folder.getMessage(id);
-            String content = MailUtil.getHtmlContent(message);
-            List<String> separate = WordsUtil.separate(content);
-            BayesUtil.getBayes().learn(type, separate);
+            Message[] messages = folder.getMessages(msgIds);
+            for (Message message : messages) {
+                String content = MailUtil.getHtmlContent(message);
+                List<String> separate = WordsUtil.separate(content);
+                BayesUtil.getBayes().learn(type, separate);
+                LOGGER.info(String.valueOf(BayesUtil.getBayes().featureWeighedAverage("赌场", "spam")));
+            }
         } catch (MessagingException | IOException e) {
             LOGGER.error("读取/解析邮件出错", e);
         }
