@@ -95,7 +95,7 @@ public class UserController {
         session.removeAttribute("password");
     }
 
-    @PutMapping("/updateName")
+    @PatchMapping
     public void updateName(String name, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (name.length() == 0) {
@@ -106,11 +106,10 @@ public class UserController {
         session.setAttribute("userName", name);
     }
 
-    @PutMapping("/updateInfo")
+    @PutMapping
     public boolean updateInfo(@RequestBody Map<String, String> req, HttpSession session) throws InvocationTargetException, IllegalAccessException {
         String oldPassword = (String) session.getAttribute("password");
         String old = req.get("old");
-        System.out.println(req);
         if (!oldPassword.equals(old)) {
             return false;
         }

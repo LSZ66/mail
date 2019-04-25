@@ -8,6 +8,8 @@ import cn.szlee.mail.utils.MailUtil;
 import cn.szlee.mail.utils.WordsUtil;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Flags;
@@ -34,6 +36,8 @@ import java.util.List;
  */
 @Service
 public class MailServiceImpl implements MailService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
 
     private IMAPFolder getFolder(String box, IMAPStore store) throws MessagingException {
         switch (box) {
@@ -117,7 +121,7 @@ public class MailServiceImpl implements MailService {
             }
             folder.close();
         } catch (MessagingException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("获取邮件列表出错", e);
         }
         return list;
     }
@@ -143,14 +147,13 @@ public class MailServiceImpl implements MailService {
                 List<String> separate = WordsUtil.separate(mail.getText());
                 var bayes = BayesUtil.getBayes();
                 String category = bayes.classify(separate).getCategory();
-                String spam = "spam";
-                if (spam.equals(category)) {
+                if (Constant.SPAM.equals(category)) {
                     mail.setState(1);
                 }
             }
             folder.close();
         } catch (MessagingException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("获取/解析邮件出错", e);
         }
         return mail;
     }
@@ -162,7 +165,7 @@ public class MailServiceImpl implements MailService {
             folder.appendMessages(message);
             folder.close();
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("打开文件夹出错", e);
         }
     }
 
@@ -177,7 +180,7 @@ public class MailServiceImpl implements MailService {
             srcFolder.close(true);
             destFolder.close();
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("操作文件夹出错", e);
         }
     }
 
@@ -188,7 +191,7 @@ public class MailServiceImpl implements MailService {
             folder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
             folder.close(true);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("操作文件夹出错", e);
         }
     }
 
@@ -199,7 +202,7 @@ public class MailServiceImpl implements MailService {
             folder.setFlags(msgIds, new Flags(Flags.Flag.SEEN), true);
             folder.close();
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("操作文件夹出错", e);
         }
     }
 
@@ -230,8 +233,21 @@ public class MailServiceImpl implements MailService {
             }
             folder.close();
         } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LOGGER.error("解析邮件出错", e);
         }
         return list;
+    }
+
+    @Override
+    public void markAs(IMAPStore store, String box, int id, String type) {
+        try {
+            IMAPFolder folder = getFolder(box, store);
+            Message message = folder.getMessage(id);
+            String content = MailUtil.getHtmlContent(message);
+            List<String> separate = WordsUtil.separate(content);
+            BayesUtil.getBayes().learn(type, separate);
+        } catch (MessagingException | IOException e) {
+            LOGGER.error("读取/解析邮件出错", e);
+        }
     }
 }

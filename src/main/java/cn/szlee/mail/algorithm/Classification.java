@@ -3,6 +3,7 @@ package cn.szlee.mail.algorithm;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -11,38 +12,40 @@ import java.util.Collection;
  * A basic wrapper reflecting a classification. It will store both featureSet
  * and resulting classification.
  *
- * @param <T> The feature class.
- * @param <K> The category class.
+ * @param <T> 特征的类型.
+ * @param <K> 类别的类型.
  * @author Philipp Nolte
  */
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class Classification<T, K> implements Serializable {
 
+    private static final long serialVersionUID = -1210981535415341283L;
+
     /**
-     * The classified featureSet.
+     * 特征集合.
      */
     @Getter
     private Collection<T> featureSet;
 
     /**
-     * The category as which the featureSet was classified.
+     * 特征所属类别.
      */
     @Getter
     private K category;
 
     /**
-     * The probability that the featureSet belongs to the given category.
+     * 该特征集属于该类别的概率.
      */
     @Getter
     private float probability;
 
     /**
-     * Constructs a new Classification with the parameters given and a default
-     * probability of 1.
+     * 构造一个新的分类.
      *
-     * @param featureSet The featureSet.
-     * @param category   The category.
+     * @param featureSet 特征集合.
+     * @param category   特征所属类别.
      */
     Classification(Collection<T> featureSet, K category) {
         this(featureSet, category, 1.0f);

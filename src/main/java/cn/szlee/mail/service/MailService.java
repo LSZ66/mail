@@ -82,4 +82,14 @@ public interface MailService {
      * @return 搜索到的邮件
      */
     List<Mail> search(IMAPStore store, String box, String pattern);
+
+    /**
+     * 标记一封邮件为垃圾/普通邮件
+     *
+     * @param store 用户邮件空间
+     * @param box   文件夹
+     * @param id    邮件id
+     * @param type  类型：垃圾邮件或正常邮件
+     */
+    void markAs(IMAPStore store, String box, int id, String type);
 }

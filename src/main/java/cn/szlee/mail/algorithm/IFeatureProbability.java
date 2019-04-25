@@ -10,12 +10,11 @@ package cn.szlee.mail.algorithm;
 public interface IFeatureProbability<T, K> {
 
     /**
-     * Returns the probability of a <code>feature</code> being classified as
-     * <code>category</code> in the learning set.
+     * 返回某一已经学习并分类的<code>类别</code>中<code>特征</code>的概率
      *
-     * @param feature  the feature to return the probability for
-     * @param category the category to check the feature against
-     * @return the probability <code>p(feature|category)</code>
+     * @param feature  特征的概率
+     * @param category 属于的类别
+     * @return 概率 <code>p(特征|类别)</code>
      */
     float featureProbability(T feature, K category);
 }

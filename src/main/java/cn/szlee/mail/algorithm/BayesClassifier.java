@@ -8,11 +8,11 @@ import java.util.TreeSet;
  * A concrete implementation of the abstract AbstractClassifier class.  The Bayes
  * classifier implements a naive Bayes approach to classifying a given set of
  * features: classify(feat1,...,featN) = argmax(P(cat)*PROD(P(featI|cat)
+ * http://en.wikipedia.org/wiki/Naive_Bayes_classifier
  *
  * @param <T> The feature class.
  * @param <K> The category class.
  * @author Philipp Nolte
- * @see http://en.wikipedia.org/wiki/Naive_Bayes_classifier
  */
 public class BayesClassifier<T, K> extends AbstractClassifier<T, K> {
 

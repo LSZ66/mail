@@ -13,7 +13,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,7 +79,6 @@ public class MailController {
     @PutMapping("/move/{src}/{dest}")
     public void move(@PathVariable String src, @PathVariable String dest, @RequestBody int[] msgIds, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        System.out.println(Arrays.toString(msgIds));
         service.moveToBox(userStore, src, dest, msgIds);
     }
 
@@ -88,5 +86,14 @@ public class MailController {
     public void delete(@PathVariable String box, @RequestBody int[] msgIds, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         service.delete(userStore, box, msgIds);
+    }
+
+    @PatchMapping("/mark/{box}/{id}/{type}")
+    public void markAsSpam(@PathVariable String box,
+                           @PathVariable Integer id,
+                           @PathVariable String type,
+                           HttpSession session) {
+        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
+        service.markAs(userStore, box, id, type);
     }
 }

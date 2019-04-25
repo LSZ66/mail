@@ -154,17 +154,6 @@ public class MailUtil {
     }
 
     /**
-     * 获取邮件文本信息
-     *
-     * @param message   邮件体
-     * @return 邮件文本信息
-     */
-    public static String getTextContent(Message message) throws IOException, MessagingException {
-        String htmlContent = getHtmlContent(message);
-        return HtmlUtil.getTextFromHtml(htmlContent);
-    }
-
-    /**
      * 获取邮件HTML内容
      *
      * @param message 邮件体

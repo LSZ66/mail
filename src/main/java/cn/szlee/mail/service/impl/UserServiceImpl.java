@@ -7,6 +7,8 @@ import cn.szlee.mail.service.UserService;
 import cn.szlee.mail.utils.CalenderUtil;
 import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import java.util.Properties;
  */
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserRepository repo;
@@ -89,7 +93,7 @@ public class UserServiceImpl implements UserService {
             map.put("outbox", folder.getMessageCount());
             folder.close();
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("打开文件夹失败", e);
         }
         return map;
     }
@@ -125,7 +129,7 @@ public class UserServiceImpl implements UserService {
         try {
             store = MailUtil.getStore(email, password);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("登陆IMAP服务器失败", e);
         }
         map.put("sender", sender);
         map.put("store", store);
@@ -154,7 +158,7 @@ public class UserServiceImpl implements UserService {
                 map.merge(date, 1, Integer::sum);
             }
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.error("打开文件夹失败", e);
         }
         return map;
     }
