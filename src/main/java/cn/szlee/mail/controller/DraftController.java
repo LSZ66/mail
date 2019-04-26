@@ -26,19 +26,19 @@ public class DraftController {
     private DraftService service;
 
     @PostMapping
-    public void save(@RequestBody Draft draft, HttpSession session) {
+    public void add(@RequestBody Draft draft, HttpSession session) {
         int userId = (Integer) session.getAttribute("userId");
         draft.setUserId(userId);
         service.save(draft);
     }
 
-    @GetMapping("/getList")
+    @GetMapping("/list")
     public List<Draft> getList(HttpSession session) {
         int userId = (Integer) session.getAttribute("userId");
         return service.getList(userId);
     }
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/{id}")
     public Draft getById(@PathVariable Integer id) {
         System.out.println(service.getById(id));
         return service.getById(id);

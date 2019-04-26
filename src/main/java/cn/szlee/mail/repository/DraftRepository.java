@@ -15,4 +15,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @since mail ${PROJECT_VERSION}
  */
 public interface DraftRepository extends JpaRepository<Draft, Integer>, JpaSpecificationExecutor<Draft> {
+
 }

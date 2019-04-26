@@ -85,15 +85,17 @@ public class BayesClassifier<T, K> extends AbstractClassifier<T, K> {
     }
 
     /**
-     * Classifies the given set of features.
+     * 对特征进行分类
      *
-     * @return The category the set of features is classified as.
+     * @return 特征所属的类别
      */
     @Override
     public Classification<T, K> classify(Collection<T> features) {
+        //计算指定特征集合的概率
         SortedSet<Classification<T, K>> probabilities =
                 this.categoryProbabilities(features);
 
+        //取SortedSet.last()，即概率最大的类别
         if (probabilities.size() > 0) {
             return probabilities.last();
         }

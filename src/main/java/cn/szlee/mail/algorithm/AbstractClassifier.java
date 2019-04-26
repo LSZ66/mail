@@ -373,10 +373,9 @@ public abstract class AbstractClassifier<T, K> implements IFeatureProbability<T,
     }
 
     /**
-     * Train the classifier by telling it that the given features resulted in
-     * the given category.
+     * 训练分类器
      *
-     * @param classification The classification to learn.
+     * @param classification 被学习的特征和所属类别
      */
     public void learn(Classification<T, K> classification) {
 

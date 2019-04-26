@@ -17,7 +17,7 @@ import java.util.List;
 public interface DraftService {
 
     /**
-     * 保存草稿到草稿箱
+     * 新增/保存草稿到草稿箱
      *
      * @param draft 稿件实体类
      */

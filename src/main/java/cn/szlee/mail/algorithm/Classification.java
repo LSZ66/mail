@@ -9,8 +9,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * A basic wrapper reflecting a classification. It will store both featureSet
- * and resulting classification.
+ * 类别
  *
  * @param <T> 特征的类型.
  * @param <K> 类别的类型.

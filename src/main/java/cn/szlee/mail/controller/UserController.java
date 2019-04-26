@@ -51,14 +51,14 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getBanner")
+    @GetMapping("/banner")
     public String getBannerName(HttpSession session) {
         String name = (String) session.getAttribute("userName");
         return name != null ?
                 name : (String) session.getAttribute("userEmail");
     }
 
-    @GetMapping("/getName")
+    @GetMapping("/name")
     public String getName(HttpSession session) {
         return (String) session.getAttribute("userName");
     }

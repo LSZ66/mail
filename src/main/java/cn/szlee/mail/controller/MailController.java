@@ -48,7 +48,7 @@ public class MailController {
         return service.getMessageById(box, id, userStore);
     }
 
-    @GetMapping("/search/{box}/{pattern}")
+    @GetMapping("/listCond/{box}/{pattern}")
     public List<Mail> search(@PathVariable String box, @PathVariable String pattern, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         return service.search(userStore, box, pattern);
