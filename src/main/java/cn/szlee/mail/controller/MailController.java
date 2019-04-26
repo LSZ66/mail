@@ -33,13 +33,13 @@ public class MailController {
     @Autowired
     private MailService service;
 
-    @GetMapping("/getList/{box}")
+    @GetMapping("/list/{box}")
     public List<Mail> getList(@PathVariable String box, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         return service.getListByBox(box, userStore);
     }
 
-    @GetMapping("/getMsg/{box}/{id}")
+    @GetMapping("/msg/{box}/{id}")
     public Mail getMessageById(@PathVariable String box, @PathVariable Integer id, HttpSession session) {
         if (id == null) {
             return null;
@@ -70,25 +70,25 @@ public class MailController {
         service.saveToBox(userStore, Constant.OUTBOX, message);
     }
 
-    @PutMapping("/setSeen")
+    @PutMapping
     public void setSeen(@RequestBody int[] msgIds, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         service.setSeen(userStore, msgIds);
     }
 
-    @PutMapping("/move/{src}/{dest}")
+    @PutMapping("/{src}/{dest}")
     public void move(@PathVariable String src, @PathVariable String dest, @RequestBody int[] msgIds, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         service.moveToBox(userStore, src, dest, msgIds);
     }
 
-    @DeleteMapping("/delete/{box}")
+    @DeleteMapping("/{box}")
     public void delete(@PathVariable String box, @RequestBody int[] msgIds, HttpSession session) {
         IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
         service.delete(userStore, box, msgIds);
     }
 
-    @PatchMapping("/mark/{box}/{type}")
+    @PatchMapping("/{box}/{type}")
     public void markAs(@PathVariable String box,
                        @PathVariable String type,
                        @RequestBody int[] msgIds,
