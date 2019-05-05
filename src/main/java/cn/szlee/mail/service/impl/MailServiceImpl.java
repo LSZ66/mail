@@ -1,5 +1,6 @@
 package cn.szlee.mail.service.impl;
 
+import cn.szlee.mail.algorithm.BayesClassifier;
 import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
@@ -7,7 +8,6 @@ import cn.szlee.mail.utils.BayesUtil;
 import cn.szlee.mail.utils.MailUtil;
 import cn.szlee.mail.utils.WordsUtil;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.search.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,31 +41,6 @@ public class MailServiceImpl implements MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
 
-    private IMAPFolder getFolder(String box, IMAPStore store) throws MessagingException {
-        switch (box) {
-            case "inbox":
-                box = Constant.INBOX;
-                break;
-            case "outbox":
-                box = Constant.OUTBOX;
-                break;
-            case "spam":
-                box = Constant.SPAM_BOX;
-                break;
-            case "recycle":
-                box = Constant.RECYCLE;
-                break;
-            default:
-                break;
-        }
-        IMAPFolder folder = (IMAPFolder) store.getFolder(box);
-        if (!folder.exists()) {
-            folder.create(Folder.HOLDS_MESSAGES);
-        }
-        folder.open(Folder.READ_WRITE);
-        return folder;
-    }
-
     /**
      * 封装接收类邮件
      *
@@ -79,17 +56,29 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public List<Mail> getListByBox(String box, IMAPStore store) {
-        List<Mail> list = new LinkedList<>();
-        IMAPFolder folder;
+    public List<Mail> getListByBox(IMAPFolder folder, int pageNo, int totalCount) {
+        int pageSize = 10;
+        List<Mail> list = new ArrayList<>();
         Message[] messages;
         try {
-            folder = getFolder(box, store);
-            messages = folder.getMessages();
+            if ((totalCount - pageNo * pageSize) > 0) {
+                messages = folder.getMessages(totalCount - pageNo * pageSize + 1, totalCount - (pageNo - 1) * pageSize);
+            } else {
+                messages = folder.getMessages(1, totalCount - (pageNo - 1) * pageSize);
+            }
+            //对邮件进行时间排序
+            Arrays.sort(messages, (o1, o2) -> {
+                try {
+                    return o2.getSentDate().compareTo(o1.getSentDate());
+                } catch (MessagingException e) {
+                    LOGGER.error("获取邮件发送时间失败", e);
+                    return 0;
+                }
+            });
             for (Message message : messages) {
                 Mail mail;
-                switch (box) {
-                    case "inbox":
+                switch (folder.getName()) {
+                    case Constant.INBOX:
                         mail = setMail(message);
                         mail.setFrom(MailUtil.getFrom(message));
                         mail.setReceiveTime(MailUtil.getDateTime(message));
@@ -103,13 +92,13 @@ public class MailServiceImpl implements MailService {
                         }
                         mail.setState(state);
                         break;
-                    case "outbox":
+                    case Constant.OUTBOX:
                         mail = setMail(message);
                         mail.setTo(MailUtil.getReceiveAddress(message));
                         mail.setSendTime(MailUtil.getDateTime(message));
                         break;
-                    case "recycle":
-                    case "spam":
+                    case Constant.RECYCLE:
+                    case Constant.SPAM_BOX:
                         mail = setMail(message);
                         mail.setFrom(MailUtil.getFrom(message));
                         mail.setReceiveTime(MailUtil.getDateTime(message));
@@ -117,9 +106,8 @@ public class MailServiceImpl implements MailService {
                     default:
                         mail = null;
                 }
-                list.add(0, mail);
+                list.add(mail);
             }
-            folder.close();
         } catch (MessagingException | IOException e) {
             LOGGER.error("获取邮件列表出错", e);
         }
@@ -127,10 +115,9 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public Mail getMessageById(String box, int id, IMAPStore store) {
+    public Mail getMessageById(IMAPFolder folder, int id) {
         Mail mail = new Mail();
         try {
-            IMAPFolder folder = getFolder(box, store);
             MimeMessage message = (MimeMessage) folder.getMessage(id);
             mail.setId(id);
             mail.setSubject(MailUtil.getSubject(message));
@@ -145,13 +132,13 @@ public class MailServiceImpl implements MailService {
             if (check) {
                 //检查是否为垃圾邮件
                 List<String> separate = WordsUtil.separate(mail.getText());
-                var bayes = BayesUtil.getBayes();
+                System.out.println(separate);
+                var bayes = new BayesClassifier<String, String>();
                 String category = bayes.classify(separate).getCategory();
                 if (Constant.SPAM.equals(category)) {
                     mail.setState(1);
                 }
             }
-            folder.close();
         } catch (MessagingException | IOException e) {
             LOGGER.error("获取/解析邮件出错", e);
         }
@@ -159,58 +146,51 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void saveToBox(IMAPStore store, String box, MimeMessage... message) {
+    public void saveToBox(IMAPFolder folder, MimeMessage... message) {
         try {
-            IMAPFolder folder = getFolder(box, store);
             folder.appendMessages(message);
-            folder.close();
         } catch (MessagingException e) {
             LOGGER.error("打开文件夹出错", e);
         }
     }
 
     @Override
-    public void moveToBox(IMAPStore store, String srcBox, String destBox, int... msgIds) {
+    public void moveToBox(IMAPFolder srcFolder, IMAPFolder destFolder, int... msgIds) {
         try {
-            IMAPFolder srcFolder = getFolder(srcBox, store);
-            IMAPFolder destFolder = getFolder(destBox, store);
             Message[] messages = srcFolder.getMessages(msgIds);
             srcFolder.copyMessages(messages, destFolder);
             srcFolder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
             srcFolder.close(true);
-            destFolder.close();
+            srcFolder.open(Folder.READ_WRITE);
         } catch (MessagingException e) {
             LOGGER.error("操作文件夹出错", e);
         }
     }
 
     @Override
-    public void delete(IMAPStore store, String box, int... msgIds) {
+    public void delete(IMAPFolder folder, int... msgIds) {
         try {
-            IMAPFolder folder = getFolder(box, store);
             folder.setFlags(msgIds, new Flags(Flags.Flag.DELETED), true);
             folder.close(true);
+            folder.open(Folder.READ_WRITE);
         } catch (MessagingException e) {
             LOGGER.error("操作文件夹出错", e);
         }
     }
 
     @Override
-    public void setSeen(IMAPStore store, int... msgIds) {
+    public void setSeen(IMAPFolder folder, int... msgIds) {
         try {
-            IMAPFolder folder = getFolder(Constant.INBOX, store);
             folder.setFlags(msgIds, new Flags(Flags.Flag.SEEN), true);
-            folder.close();
         } catch (MessagingException e) {
             LOGGER.error("操作文件夹出错", e);
         }
     }
 
     @Override
-    public List<Mail> search(IMAPStore store, String box, String pattern) {
+    public List<Mail> search(IMAPFolder folder, String pattern) {
         List<Mail> list = new LinkedList<>();
         try {
-            IMAPFolder folder = getFolder(box, store);
             SearchTerm term = new OrTerm(new SearchTerm[]{
                     new FromStringTerm(pattern),
                     new SubjectTerm(pattern),
@@ -231,7 +211,6 @@ public class MailServiceImpl implements MailService {
                 mail.setState(state);
                 list.add(0, mail);
             }
-            folder.close();
         } catch (MessagingException | UnsupportedEncodingException e) {
             LOGGER.error("解析邮件出错", e);
         }
@@ -239,18 +218,26 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void markAs(IMAPStore store, String box, String type, int... msgIds) {
+    public void markAs(IMAPFolder folder, String type, int... msgIds) {
         try {
-            IMAPFolder folder = getFolder(box, store);
             Message[] messages = folder.getMessages(msgIds);
             for (Message message : messages) {
                 String content = MailUtil.getHtmlContent(message);
                 List<String> separate = WordsUtil.separate(content);
                 BayesUtil.getBayes().learn(type, separate);
-                LOGGER.info(String.valueOf(BayesUtil.getBayes().featureWeighedAverage("赌场", "spam")));
             }
         } catch (MessagingException | IOException e) {
             LOGGER.error("读取/解析邮件出错", e);
+        }
+    }
+
+    @Override
+    public int getTotalCount(IMAPFolder folder) {
+        try {
+            return folder.getMessageCount();
+        } catch (MessagingException e) {
+            LOGGER.error("获取邮件总数出错", e);
+            return 0;
         }
     }
 }

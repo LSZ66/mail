@@ -3,7 +3,7 @@ package cn.szlee.mail.controller;
 import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
-import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.IMAPFolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -33,10 +33,19 @@ public class MailController {
     @Autowired
     private MailService service;
 
-    @GetMapping("/list/{box}")
-    public List<Mail> getList(@PathVariable String box, HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.getListByBox(box, userStore);
+    @GetMapping("/count/{box}")
+    public int getTotalCount(@PathVariable String box, HttpSession session) {
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        return service.getTotalCount(folder);
+    }
+
+    @GetMapping("/list/{box}/{pageNo}/{total}")
+    public List<Mail> getList(@PathVariable String box,
+                              @PathVariable Integer pageNo,
+                              @PathVariable Integer total,
+                              HttpSession session) {
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        return service.getListByBox(folder, pageNo, total);
     }
 
     @GetMapping("/msg/{box}/{id}")
@@ -44,14 +53,14 @@ public class MailController {
         if (id == null) {
             return null;
         }
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.getMessageById(box, id, userStore);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        return service.getMessageById(folder, id);
     }
 
     @GetMapping("/listCond/{box}/{pattern}")
     public List<Mail> search(@PathVariable String box, @PathVariable String pattern, HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        return service.search(userStore, box, pattern);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        return service.search(folder, pattern);
     }
 
     @PostMapping
@@ -66,26 +75,27 @@ public class MailController {
         helper.setSubject(mail.getSubject());
         helper.setText(mail.getText(), true);
         sender.send(message);
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.saveToBox(userStore, Constant.OUTBOX, message);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute("outbox");
+        service.saveToBox(folder, message);
     }
 
     @PutMapping
     public void setSeen(@RequestBody int[] msgIds, HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.setSeen(userStore, msgIds);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute("inbox");
+        service.setSeen(folder, msgIds);
     }
 
     @PutMapping("/{src}/{dest}")
     public void move(@PathVariable String src, @PathVariable String dest, @RequestBody int[] msgIds, HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.moveToBox(userStore, src, dest, msgIds);
+        IMAPFolder srcFolder = (IMAPFolder) session.getAttribute(src);
+        IMAPFolder destFolder = (IMAPFolder) session.getAttribute(dest);
+        service.moveToBox(srcFolder, destFolder, msgIds);
     }
 
     @DeleteMapping("/{box}")
     public void delete(@PathVariable String box, @RequestBody int[] msgIds, HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.delete(userStore, box, msgIds);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        service.delete(folder, msgIds);
     }
 
     @PatchMapping("/{box}/{type}")
@@ -93,7 +103,7 @@ public class MailController {
                        @PathVariable String type,
                        @RequestBody int[] msgIds,
                        HttpSession session) {
-        IMAPStore userStore = (IMAPStore) session.getAttribute("userStore");
-        service.markAs(userStore, box, type, msgIds);
+        IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
+        service.markAs(folder, type, msgIds);
     }
 }

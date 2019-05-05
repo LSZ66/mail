@@ -1,7 +1,7 @@
 package cn.szlee.mail.service;
 
 import cn.szlee.mail.entity.Mail;
-import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.IMAPFolder;
 
 import javax.mail.internet.MimeMessage;
 import java.util.List;
@@ -21,75 +21,79 @@ public interface MailService {
     /**
      * 获取某文件夹中邮件列表
      *
-     * @param box   文件夹
-     * @param store 用户邮箱空间
+     * @param folder     文件夹
+     * @param pageNo     页码
+     * @param totalCount 总邮件数
      * @return 该文件夹邮件列表
      */
-    List<Mail> getListByBox(String box, IMAPStore store);
+    List<Mail> getListByBox(IMAPFolder folder, int pageNo, int totalCount);
 
     /**
-     * 根据文件夹和id取出一份邮件
+     * 获取一份邮件
      *
-     * @param box   指定文件夹
-     * @param id    邮件id
-     * @param store 用户邮件空间
-     * @return id对应的邮件
+     * @param folder 文件夹
+     * @param id     邮件id
+     * @return 邮件
      */
-    Mail getMessageById(String box, int id, IMAPStore store);
+    Mail getMessageById(IMAPFolder folder, int id);
 
     /**
      * 将邮件保存到指定文件夹
      *
-     * @param store   用户邮件空间
-     * @param box     文件夹
-     * @param message 信息
+     * @param folder  文件夹
+     * @param message 邮件
      */
-    void saveToBox(IMAPStore store, String box, MimeMessage... message);
+    void saveToBox(IMAPFolder folder, MimeMessage... message);
 
     /**
      * 移动邮件
      *
-     * @param store   用户邮件空间
-     * @param srcBox  源文件夹
-     * @param destBox 目标文件夹
-     * @param msgIds  邮件id
+     * @param srcFolder  源文件夹
+     * @param destFolder 目标文件夹
+     * @param msgIds     邮件id
      */
-    void moveToBox(IMAPStore store, String srcBox, String destBox, int... msgIds);
+    void moveToBox(IMAPFolder srcFolder, IMAPFolder destFolder, int... msgIds);
 
     /**
      * 删除邮件
      *
-     * @param store  用户邮件空间
-     * @param box    文件夹
+     * @param folder 文件夹
      * @param msgIds 邮件id
      */
-    void delete(IMAPStore store, String box, int... msgIds);
+    void delete(IMAPFolder folder, int... msgIds);
 
     /**
      * 设置收件箱邮件已读
      *
-     * @param store  用户邮件空间
+     * @param folder 用户邮件空间
      * @param msgIds 邮件id
      */
-    void setSeen(IMAPStore store, int... msgIds);
+    void setSeen(IMAPFolder folder, int... msgIds);
+
 
     /**
      * 搜索邮件内容
      *
-     * @param store   用户邮件空间
-     * @param box     文件夹
+     * @param folder  文件夹
      * @param pattern 搜索的关键字
      * @return 搜索到的邮件
      */
-    List<Mail> search(IMAPStore store, String box, String pattern);
+    List<Mail> search(IMAPFolder folder, String pattern);
 
     /**
      * 标记一封邮件为垃圾/普通邮件
      *
-     * @param store  用户邮件空间
-     * @param box    文件夹
+     * @param folder 文件夹
      * @param type   类型：垃圾邮件或正常邮件
      * @param msgIds 邮件id
      */
-    void markAs(IMAPStore store, String box, String type, int... msgIds);
+    void markAs(IMAPFolder folder, String type, int... msgIds);
+
+    /**
+     * 查询邮件总数
+     *
+     * @param folder 文件夹
+     * @return 文件夹邮件总数
+     */
+    int getTotalCount(IMAPFolder folder);
 }

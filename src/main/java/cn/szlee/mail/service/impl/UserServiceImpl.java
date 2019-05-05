@@ -82,16 +82,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<String, Integer> getMessageCount(IMAPStore store) {
-        Map<String, Integer> map = new HashMap<>(4);
+    public Map<String, Integer> getMessageCount(Map<String, Folder> folderMap) {
+        Map<String, Integer> map = new HashMap<>(3);
         try {
-            Folder folder = openFolder(store, Constant.INBOX);
-            map.put("unread", folder.getUnreadMessageCount());
-            map.put("inbox", folder.getMessageCount());
-            folder.close();
+            map.put("unread", folderMap.get("inbox").getUnreadMessageCount());
+            map.put("inbox", folderMap.get("inbox").getMessageCount());
+            map.put("outbox", folderMap.get("outbox").getMessageCount());
+        } catch (MessagingException e) {
+            LOGGER.error("打开文件夹失败", e);
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, Folder> getUserFolder(IMAPStore store) {
+        Map<String, Folder> map = new HashMap<>(4);
+        Folder folder;
+        try {
+            folder = openFolder(store, Constant.INBOX);
+            map.put("inbox", folder);
             folder = openFolder(store, Constant.OUTBOX);
-            map.put("outbox", folder.getMessageCount());
-            folder.close();
+            map.put("outbox", folder);
+            folder = openFolder(store, Constant.SPAM_BOX);
+            map.put("spam", folder);
+            folder = openFolder(store, Constant.RECYCLE);
+            map.put("recycle", folder);
         } catch (MessagingException e) {
             LOGGER.error("打开文件夹失败", e);
         }

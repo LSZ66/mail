@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
@@ -71,23 +72,39 @@ public class UserController {
         }
         JavaMailSender userSender = (JavaMailSender) session.getAttribute("userSender");
         Map<String, Integer> overview;
+        //未登录
         if (userSender == null) {
+            //获取原始密码登录
             String password = (String) session.getAttribute("password");
             Map<String, Object> map = service.getSenderAndReceiver(userEmail, password);
             Object sender = map.get("sender");
             Object store = map.get("store");
             session.setAttribute("userSender", sender);
             session.setAttribute("userStore", store);
-            overview = service.getMessageCount((IMAPStore) store);
+            Map<String, Folder> userFolder = service.getUserFolder((IMAPStore) store);
+            userFolder.forEach(session::setAttribute);
+            overview = service.getMessageCount(userFolder);
         } else {
-            IMAPStore store = (IMAPStore) session.getAttribute("userStore");
-            overview = service.getMessageCount(store);
+            Folder inbox = (Folder) session.getAttribute("inbox");
+            Folder outbox = (Folder) session.getAttribute("outbox");
+            Folder spam = (Folder) session.getAttribute("spam");
+            Folder recycle = (Folder) session.getAttribute("recycle");
+            Map<String, Folder> userFolder = new HashMap<>(4);
+            userFolder.put("inbox", inbox);
+            userFolder.put("outbox", outbox);
+            userFolder.put("spam", spam);
+            userFolder.put("recycle", recycle);
+            overview = service.getMessageCount(userFolder);
         }
         return overview;
     }
 
     @GetMapping("/logout")
     public void logout(HttpSession session) throws MessagingException {
+        ((Folder) session.getAttribute("inbox")).close();
+        ((Folder) session.getAttribute("outbox")).close();
+        ((Folder) session.getAttribute("spam")).close();
+        ((Folder) session.getAttribute("recycle")).close();
         IMAPStore store = (IMAPStore) session.getAttribute("userStore");
         store.close();
         session.removeAttribute("userName");

@@ -3,6 +3,7 @@ package cn.szlee.mail.service;
 import cn.szlee.mail.entity.User;
 import com.sun.mail.imap.IMAPStore;
 
+import javax.mail.Folder;
 import java.util.Map;
 
 /**
@@ -52,10 +53,18 @@ public interface UserService {
     /**
      * 获取各文件夹中邮件计数
      *
-     * @param store 用户邮箱空间
+     * @param folderMap 用户文件夹
      * @return 邮件计数
      */
-    Map<String, Integer> getMessageCount(IMAPStore store);
+    Map<String, Integer> getMessageCount(Map<String, Folder> folderMap);
+
+    /**
+     * 加载用户的文件夹
+     *
+     * @param store 用户邮箱空间
+     * @return 用户的文件夹
+     */
+    Map<String, Folder> getUserFolder(IMAPStore store);
 
     /**
      * 更新用户发件姓名
