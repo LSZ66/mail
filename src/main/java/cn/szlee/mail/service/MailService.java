@@ -23,10 +23,9 @@ public interface MailService {
      *
      * @param folder     文件夹
      * @param pageNo     页码
-     * @param totalCount 总邮件数
      * @return 该文件夹邮件列表
      */
-    List<Mail> getListByBox(IMAPFolder folder, int pageNo, int totalCount);
+    List<Mail> getListByBox(IMAPFolder folder, int pageNo);
 
     /**
      * 获取一份邮件

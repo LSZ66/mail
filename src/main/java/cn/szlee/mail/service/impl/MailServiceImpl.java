@@ -56,15 +56,16 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public List<Mail> getListByBox(IMAPFolder folder, int pageNo, int totalCount) {
+    public List<Mail> getListByBox(IMAPFolder folder, int pageNo) {
         int pageSize = 10;
         List<Mail> list = new ArrayList<>();
         Message[] messages;
         try {
-            if ((totalCount - pageNo * pageSize) > 0) {
-                messages = folder.getMessages(totalCount - pageNo * pageSize + 1, totalCount - (pageNo - 1) * pageSize);
+            int total = folder.getMessageCount();
+            if ((total - pageNo * pageSize) > 0) {
+                messages = folder.getMessages(total - pageNo * pageSize + 1, total - (pageNo - 1) * pageSize);
             } else {
-                messages = folder.getMessages(1, totalCount - (pageNo - 1) * pageSize);
+                messages = folder.getMessages(1, total - (pageNo - 1) * pageSize);
             }
             //对邮件进行时间排序
             Arrays.sort(messages, (o1, o2) -> {
@@ -133,7 +134,7 @@ public class MailServiceImpl implements MailService {
                 //检查是否为垃圾邮件
                 List<String> separate = WordsUtil.separate(mail.getText());
                 System.out.println(separate);
-                var bayes = new BayesClassifier<String, String>();
+                var bayes = BayesUtil.getBayes();
                 String category = bayes.classify(separate).getCategory();
                 if (Constant.SPAM.equals(category)) {
                     mail.setState(1);

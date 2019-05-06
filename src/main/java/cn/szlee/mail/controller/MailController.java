@@ -39,13 +39,12 @@ public class MailController {
         return service.getTotalCount(folder);
     }
 
-    @GetMapping("/list/{box}/{pageNo}/{total}")
+    @GetMapping("/list/{box}/{pageNo}")
     public List<Mail> getList(@PathVariable String box,
                               @PathVariable Integer pageNo,
-                              @PathVariable Integer total,
                               HttpSession session) {
         IMAPFolder folder = (IMAPFolder) session.getAttribute(box);
-        return service.getListByBox(folder, pageNo, total);
+        return service.getListByBox(folder, pageNo);
     }
 
     @GetMapping("/msg/{box}/{id}")
