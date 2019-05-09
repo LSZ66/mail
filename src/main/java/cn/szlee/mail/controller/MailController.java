@@ -3,6 +3,7 @@ package cn.szlee.mail.controller;
 import cn.szlee.mail.config.Constant;
 import cn.szlee.mail.entity.Mail;
 import cn.szlee.mail.service.MailService;
+import cn.szlee.mail.utils.MailUtil;
 import com.sun.mail.imap.IMAPFolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -74,6 +75,10 @@ public class MailController {
         helper.setSubject(mail.getSubject());
         helper.setText(mail.getText(), true);
         sender.send(message);
+        if (mail.isReply()) {
+            IMAPFolder inbox = (IMAPFolder) session.getAttribute("inbox");
+            service.setReply(inbox, mail.getId());
+        }
         IMAPFolder folder = (IMAPFolder) session.getAttribute("outbox");
         service.saveToBox(folder, message);
     }

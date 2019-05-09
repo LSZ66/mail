@@ -125,15 +125,10 @@ public class MailServiceImpl implements MailService {
             mail.setFrom(MailUtil.getFullFrom(message));
             mail.setTo(MailUtil.getReceiveAddress(message));
             mail.setReceiveTime(MailUtil.getDateTime(message));
-            boolean check = true;
-            if (MailUtil.isSeen(message)) {
-                check = false;
-            }
             mail.setText(MailUtil.getHtmlContent(message));
-            if (check) {
+            if (Constant.INBOX.equals(folder.getName())) {
                 //检查是否为垃圾邮件
                 List<String> separate = WordsUtil.separate(mail.getText());
-                System.out.println(separate);
                 var bayes = BayesUtil.getBayes();
                 String category = bayes.classify(separate).getCategory();
                 if (Constant.SPAM.equals(category)) {
@@ -183,6 +178,14 @@ public class MailServiceImpl implements MailService {
     public void setSeen(IMAPFolder folder, int... msgIds) {
         try {
             folder.setFlags(msgIds, new Flags(Flags.Flag.SEEN), true);
+        } catch (MessagingException e) {
+            LOGGER.error("操作文件夹出错", e);
+        }
+    }
+
+    public void setReply(IMAPFolder folder, int... msgId) {
+        try {
+            folder.setFlags(msgId, new Flags(Flags.Flag.ANSWERED), true);
         } catch (MessagingException e) {
             LOGGER.error("操作文件夹出错", e);
         }

@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.szlee</groupId>
     <artifactId>mail</artifactId>
-    <version>1.5.3</version>
+    <version>1.6.0</version>
     <name>mail</name>
     <description>Graduation Project</description>
     <packaging>jar</packaging>

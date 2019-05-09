@@ -23,4 +23,5 @@ public class Mail {
     private String sendTime;
     private String text;
     private Integer state;
+    private boolean reply;
 }

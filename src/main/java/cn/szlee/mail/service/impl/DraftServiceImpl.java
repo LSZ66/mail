@@ -31,7 +31,7 @@ public class DraftServiceImpl implements DraftService {
 
     @Override
     public List<Draft> getList(int userId) {
-        return repo.findAll();
+        return repo.findAllByUserIdOrderByIdDesc(userId);
     }
 
     @Override

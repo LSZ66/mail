@@ -10,6 +10,7 @@ import com.sun.mail.imap.IMAPStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ import javax.mail.search.SentDateTerm;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * <b><code>UserServiceImpl</code></b>
@@ -41,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository repo;
+
+    @Autowired
+    private TaskExecutor taskExecutor;
 
     @Override
     public User queryForLogin(String username, String password) {
@@ -96,19 +102,61 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<String, Folder> getUserFolder(IMAPStore store) {
-        Map<String, Folder> map = new HashMap<>(4);
-        Folder folder;
-        try {
-            folder = openFolder(store, Constant.INBOX);
+        Map<String, Folder> map = new ConcurrentHashMap<>(4);
+        final CountDownLatch latch = new CountDownLatch(4);
+        taskExecutor.execute(()->{
+            LOGGER.info("open inbox");
+            Folder folder = null;
+            try {
+                folder = openFolder(store, Constant.INBOX);
+            } catch (MessagingException e) {
+                LOGGER.error("打开收件箱失败", e);
+            }
             map.put("inbox", folder);
-            folder = openFolder(store, Constant.OUTBOX);
+            latch.countDown();
+            LOGGER.info("open inbox success");
+        });
+        taskExecutor.execute(()->{
+            LOGGER.info("open outbox");
+            Folder folder = null;
+            try {
+                folder = openFolder(store, Constant.OUTBOX);
+            } catch (MessagingException e) {
+                LOGGER.error("打开发件箱失败", e);
+            }
             map.put("outbox", folder);
-            folder = openFolder(store, Constant.SPAM_BOX);
+            latch.countDown();
+            LOGGER.info("open outbox success");
+        });
+        taskExecutor.execute(()->{
+            LOGGER.info("open spam");
+            Folder folder = null;
+            try {
+                folder = openFolder(store, Constant.SPAM_BOX);
+            } catch (MessagingException e) {
+                LOGGER.error("打开垃圾箱失败", e);
+            }
             map.put("spam", folder);
-            folder = openFolder(store, Constant.RECYCLE);
+            latch.countDown();
+            LOGGER.info("open spam success");
+        });
+        taskExecutor.execute(()->{
+            LOGGER.info("open recycle");
+            Folder folder = null;
+            try {
+                folder = openFolder(store, Constant.RECYCLE);
+            } catch (MessagingException e) {
+                LOGGER.error("打开回收站失败", e);
+            }
             map.put("recycle", folder);
-        } catch (MessagingException e) {
-            LOGGER.error("打开文件夹失败", e);
+            latch.countDown();
+            LOGGER.info("open recycle success");
+        });
+        try {
+            latch.await();
+            LOGGER.info("await");
+        } catch (InterruptedException e) {
+            LOGGER.error("多线程执行错误", e);
         }
         return map;
     }

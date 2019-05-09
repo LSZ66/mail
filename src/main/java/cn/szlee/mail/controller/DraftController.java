@@ -40,7 +40,6 @@ public class DraftController {
 
     @GetMapping("/{id}")
     public Draft getById(@PathVariable Integer id) {
-        System.out.println(service.getById(id));
         return service.getById(id);
     }
 

@@ -21,8 +21,8 @@ public interface MailService {
     /**
      * 获取某文件夹中邮件列表
      *
-     * @param folder     文件夹
-     * @param pageNo     页码
+     * @param folder 文件夹
+     * @param pageNo 页码
      * @return 该文件夹邮件列表
      */
     List<Mail> getListByBox(IMAPFolder folder, int pageNo);
@@ -64,10 +64,18 @@ public interface MailService {
     /**
      * 设置收件箱邮件已读
      *
-     * @param folder 用户邮件空间
+     * @param folder 文件夹
      * @param msgIds 邮件id
      */
     void setSeen(IMAPFolder folder, int... msgIds);
+
+    /**
+     * 设置邮件已回复
+     *
+     * @param folder 文件夹
+     * @param msgIds 邮件id
+     */
+    void setReply(IMAPFolder folder, int... msgIds);
 
 
     /**
